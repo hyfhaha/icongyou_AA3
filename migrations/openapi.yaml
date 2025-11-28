@@ -1,0 +1,589 @@
+openapi: 3.0.0
+info:
+  title: Learning Backend API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/auth/login:
+    post:
+      summary: 登录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /api/auth/register:
+    post:
+      summary: 用户注册
+      description: 用于创建学生或教师账户，便于本系统独立演示。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /api/courses:
+    get:
+      summary: 课程列表（课程入口）
+      description: 用于多课程导览入口，支持按关键词搜索课程。
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 10 }
+      responses:
+        '200': { description: OK }
+
+  /api/courses/overview:
+    get:
+      summary: 学生多课程导览总览
+      description: 按当前登录学生返回其参与的所有课程列表，包含总得分、完成任务数、总任务数和完成度百分比，并计算学期标签。
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 10 }
+      responses:
+        '200': { description: OK }
+
+  /api/courses/{id}:
+    get:
+      summary: 单课程详情与任务列表
+      description: 用于课程主页展示课程基本信息与该课程下的所有任务（积木）。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/courses/{id}/personal:
+    get:
+      summary: 学生在课程内的个人总览
+      description: 统计当前登录学生在指定课程下的总得分、完成任务数量以及在全班内的排名。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/courses/{id}/tasks/status:
+    get:
+      summary: 课程任务完成情况统计
+      description: |
+        - scope=me 时，返回当前学生在该课程下每个任务是否完成；
+        - scope=course 时，返回课程整体每个任务的提交人数及完成率，用于任务看板的“提交率”视图。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: scope
+          schema:
+            type: string
+            enum: [me, course]
+            default: me
+      responses:
+        '200': { description: OK }
+
+  /api/courses/{id}/students:
+    get:
+      summary: 课程学生排行榜
+      description: 按课程统计所有学生的总得分、完成任务数和名次，用于课程内排行榜看板。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/courses/{id}/abilities/me:
+    get:
+      summary: 课程内个人能力维度达成度
+      description: |
+        按课程目标（或任务类型）维度统计当前学生的任务数量、完成数、得分和达成百分比，
+        用于“能力分析/成长画像”看板。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/tasks:
+    get:
+      summary: 任务列表（课程内）
+      description: 按课程列出任务清单，并附带当前学生最近一次提交情况，用于课程任务页。
+      parameters:
+        - in: query
+          name: course_id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 10 }
+      responses:
+        '200': { description: OK }
+
+  /api/tasks/{storyId}:
+    get:
+      summary: 单个任务详情
+      description: 返回任务基本信息以及当前学生在该任务下的最新作业（如有），用于任务详情页。
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/tasks/{storyId}/board:
+    get:
+      summary: 任务数据看板
+      description: |
+        综合展示任务基础信息、提交统计（提交人数、次数、平均分等）以及热度指数（浏览量+讨论次数+提交次数），
+        用于“任务数据大屏/热度排行”。
+      parameters:
+        - name: storyId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/tasks/{storyId}/submit:
+    post:
+      summary: 学生提交作业
+      description: 用于学生对某个任务上传/更新作业内容或附件链接。
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_url: { type: string, description: 作业附件 URL 或多个 URL 拼接 }
+                content: { type: string, description: 作业文字内容或说明 }
+                course_id: { type: integer, description: 课程ID，可选，默认使用任务所属课程 }
+      responses:
+        '200': { description: OK }
+
+  /api/tasks/{storyId}/discussions:
+    get:
+      summary: 任务讨论列表
+      description: 获取某任务下的讨论区内容，可用于“任务问答/AI 结合讨论区”的人类部分。
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 10 }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: 创建任务讨论
+      description: 学生或教师就任务发起提问/回复，用于“任务讨论区”。
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content: { type: string }
+                reply_to: { type: integer, description: 被回复的讨论ID，可选 }
+      responses:
+        '201': { description: Created }
+
+  /api/tasks/{storyId}/homework/list:
+    get:
+      summary: 教师端任务作业列表
+      description: 教师/助教查看某任务下所有学生作业及评分、推荐状态，用于“优秀作业筛选”和教学反馈。
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 10 }
+      responses:
+        '200': { description: OK }
+
+  /api/homework/{id}:
+    get:
+      summary: 单个作业详情
+      description: 查看某条作业记录及其对应任务，用于学生查看自己作业或教师查看任一学生作业。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    put:
+      summary: 学生修改自己的作业
+      description: 在截止时间前学生可更新作业的附件或内容。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_url: { type: string }
+                content: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /api/homework/{id}/comment:
+    get:
+      summary: 查询作业评语
+      description: 学生或教师查看某条作业的教师点评结果。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    put:
+      summary: 教师点评作业
+      description: 教师/助教为作业添加文字评语，并更新作业的点评状态。
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /api/teams/user:
+    get:
+      summary: 当前用户加入的所有团队
+      description: 学生查看自己在各课程中加入的团队信息，用于团队学习总览。
+      responses:
+        '200': { description: OK }
+
+  /api/teams/course/{courseId}:
+    get:
+      summary: 某课程下的全部团队
+      description: 教师或学生查看指定课程的小组列表，用于选组/管理。
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: 在课程下创建团队
+      description: 教师/助教在课程中创建学习小组。
+      parameters:
+        - in: path
+          name: courseId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                group_name: { type: string }
+                max_size: { type: integer }
+                group_code: { type: string }
+      responses:
+        '201': { description: Created }
+
+  /api/teams/{teamId}/join:
+    post:
+      summary: 学生加入团队
+      description: 学生在某课程中选择加入指定小组，支持人数上限校验。
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/teams/{teamId}/quit:
+    post:
+      summary: 学生退出团队
+      description: 学生从当前所在小组中退出，更新小组人数。
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/teams/{teamId}/members:
+    get:
+      summary: 团队成员列表
+      description: 查看某个小组内所有成员及是否为组长，用于团队管理。
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/teams/{storyId}:
+    get:
+      summary: 任务维度团队成绩
+      description: 按任务统计各团队的团队得分，用于“团队任务数据看板”。
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/teams/detail/{teamId}:
+    get:
+      summary: 团队成员成绩与贡献度
+      description: 查看团队内部成员的得分与贡献度，用于团队互评与教师评价。
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/excellent/{storyId}:
+    get:
+      summary: 某任务优秀作业列表
+      description: 返回指定任务下被标记为“优秀作业”的作品列表及当前用户点赞/收藏状态。
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/excellent/{storyId}/{workId}/like:
+    post:
+      summary: 点赞/取消点赞优秀作业
+      description: 对指定优秀作业进行点赞或取消点赞，并更新点赞计数。
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/excellent/{storyId}/{workId}/bookmark:
+    post:
+      summary: 收藏/取消收藏优秀作业
+      description: 学生收藏优秀作业案例，便于个人复盘和学习。
+      parameters:
+        - in: path
+          name: storyId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/excellent/{workId}/set:
+    post:
+      summary: 设置优秀作业
+      description: 教师/助教将某条作业标记为优秀作业，并可设置推荐星级。
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recommend_rank: { type: integer, description: 推荐星级 }
+      responses:
+        '200': { description: OK }
+
+  /api/excellent/{workId}/unset:
+    post:
+      summary: 取消优秀作业
+      description: 教师/助教取消某条作业的优秀标记。
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/ai/ask:
+    post:
+      summary: AI 任务问答
+      description: 学生就任务或作业内容向 AI 提问，用于“AI 互动讨论工具”的问答能力。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question: { type: string }
+                storyId: { type: integer, description: 关联任务ID，可选 }
+      responses:
+        '200': { description: OK }
+
+  /api/ai/generate:
+    post:
+      summary: AI 写作建议与润色
+      description: 用于对学生作业内容给出结构优化和写作建议，支撑“AI 写作助手”场景。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content: { type: string }
+                storyId: { type: integer }
+                requirements: { type: string, description: 写作要求或评分标准 }
+      responses:
+        '200': { description: OK }
+
+  /api/ai/summary:
+    post:
+      summary: AI 作业/材料自动总结
+      description: 对长文本进行中文摘要，支持控制摘要长度，用于学习反思与材料整理。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content: { type: string }
+                storyId: { type: integer }
+                max_length: { type: integer, description: 期望摘要字数上限 }
+      responses:
+        '200': { description: OK }
+
+  /api/ai/comment:
+    post:
+      summary: AI 作业智能点评
+      description: 基于评分标准对学生作业生成结构化点评建议，用于“作业反馈与反思”。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content: { type: string }
+                storyId: { type: integer }
+                rubric: { type: string, description: 评分标准或侧重点 }
+      responses:
+        '200': { description: OK }
+
+  /api/view/course-students:
+    get:
+      summary: 课程学生统计视图
+      description: 以视图方式返回课程内所有学生的总分和完成任务数及排名，便于数据大屏展示。
+      parameters:
+        - in: query
+          name: course_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /api/view/task-submission:
+    get:
+      summary: 任务提交统计视图
+      description: 返回单个任务的提交人数、提交总次数、优秀作业数和平均分，用于任务数据看板和大屏。
+      parameters:
+        - in: query
+          name: story_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }

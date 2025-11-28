@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: learning_app
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Wn810628
+      MYSQL_ROOT_PASSWORD: Wn810628
+    ports: ['3306:3306']
+    volumes: ['db-data:/var/lib/mysql']
+  app:
+    build: .
+    ports: ['3000:3000']
+    environment:
+      - DB_HOST=db
+      - DB_NAME=learning_app
+      - DB_USER=root
+      - DB_PASS=Wn810628
+      - JWT_SECRET=Wn810628
+    depends_on: ['db']
+volumes:
+  db-data:
