@@ -42,6 +42,8 @@ module.exports = {
         return {
           ...plain,
           done: Boolean(latest),
+          // work_status: null=未提交, 0=已提交未点评, 1=已提交已点评
+          work_status: latest ? (latest.status === 1 ? 1 : 0) : null,
           latest_submission_id: latest ? latest.id : null,
           latest_score: latest && latest.score !== null ? Number(latest.score) : null,
           latest_submit_time: latest ? latest.create_time : null
@@ -195,7 +197,13 @@ module.exports = {
         }
       }
 
-      return res.json({ story, myWork, materials, viewCount, permission });
+      // 为 story 对象添加 done 字段和 work_status 字段
+      const storyPlain = story.get ? story.get({ plain: true }) : story;
+      storyPlain.done = Boolean(myWork);
+      // work_status: null=未提交, 0=已提交未点评, 1=已提交已点评
+      storyPlain.work_status = myWork ? (myWork.status === 1 ? 1 : 0) : null;
+      
+      return res.json({ story: storyPlain, myWork, materials, viewCount, permission });
     } catch (err) {
       return res.status(500).json({ message: '获取任务详情失败', error: err.message });
     }
