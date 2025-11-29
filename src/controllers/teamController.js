@@ -100,6 +100,7 @@ module.exports = {
 
         return {
           ...member,
+          student_id: member.student_id, // 确保返回用户ID（user.id），用于前端提交时匹配贡献度
           // 确保学号字段正确返回（兼容多种命名）
           studentId: member.jobNumber || member.job_number || '',
           jobNumber: member.jobNumber || member.job_number || '',
