@@ -168,26 +168,80 @@ module.exports = {
     try {
       const courseId = req.params.id;
       const userId = req.user.id;
+      
+      // 获取当前学生的总分和已完成任务数
       const totals = await sequelize.query(
         'SELECT SUM(IFNULL(score,0)) as total_score, COUNT(DISTINCT story_id) as tasks_done FROM course_student_work WHERE course_id=? AND student_id=? AND deleted=0',
         { replacements: [courseId, userId], type: QueryTypes.SELECT }
       );
+      
+      // 获取所有学生的总分排名
       const ranking = await sequelize.query(
-        'SELECT student_id, SUM(IFNULL(score,0)) as total FROM course_student_work WHERE course_id=? AND deleted=0 GROUP BY student_id ORDER BY total DESC LIMIT 100',
+        'SELECT student_id, SUM(IFNULL(score,0)) as total FROM course_student_work WHERE course_id=? AND deleted=0 GROUP BY student_id ORDER BY total DESC',
         { replacements: [courseId], type: QueryTypes.SELECT }
       );
+      
+      // 获取课程总任务数
+      const totalTasksResult = await sequelize.query(
+        'SELECT COUNT(DISTINCT id) as total_tasks FROM course_map_story WHERE course_id=? AND deleted=0',
+        { replacements: [courseId], type: QueryTypes.SELECT }
+      );
+      
+      // 获取课程学生总数
+      const studentCountResult = await sequelize.query(
+        'SELECT COUNT(DISTINCT student_id) as student_count FROM course_student WHERE course_id=? AND deleted=0',
+        { replacements: [courseId], type: QueryTypes.SELECT }
+      );
+      
       const myTotal = totals[0] || { total_score: 0, tasks_done: 0 };
+      const totalTasks = Number(totalTasksResult[0]?.total_tasks || 0);
+      const studentCount = Number(studentCountResult[0]?.student_count || 0);
+      
+      // 计算排名
       let rank = null;
+      let myTotalScore = parseFloat(myTotal.total_score || 0);
       for (let i = 0; i < ranking.length; i++) {
         if (ranking[i].student_id == userId) {
           rank = i + 1;
           break;
         }
       }
+      
+      // 计算班级平均分
+      let avgScore = 0;
+      if (ranking.length > 0) {
+        const sum = ranking.reduce((acc, item) => acc + parseFloat(item.total || 0), 0);
+        avgScore = ranking.length > 0 ? sum / ranking.length : 0;
+      }
+      
+      // 计算排名百分比
+      let rankPercent = 0;
+      if (rank && studentCount > 0) {
+        rankPercent = ((studentCount - rank + 1) / studentCount) * 100;
+      }
+      
+      const totalScore = myTotalScore;
+      const finishedTasks = Number(myTotal.tasks_done || 0);
+      
       return res.json({
-        total_score: parseFloat(myTotal.total_score || 0),
-        tasks_done: myTotal.tasks_done,
-        rank
+        // 下划线命名（兼容性）
+        total_score: totalScore,
+        tasks_done: finishedTasks,
+        total_tasks: totalTasks,
+        rank: rank,
+        avg_score: avgScore,
+        rank_percent: rankPercent,
+        student_count: studentCount,
+        // 驼峰命名（前端友好）
+        courseId: Number(courseId),
+        totalScore: totalScore,
+        finishedTasks: finishedTasks,
+        totalTasks: totalTasks,
+        rank: rank,
+        avgScore: avgScore,
+        averageScore: avgScore, // 额外兼容字段
+        rankPercent: rankPercent,
+        studentCount: studentCount
       });
     } catch (err) {
       return res.status(500).json({ message: '课程个人总览获取失败', error: err.message });
@@ -479,15 +533,65 @@ module.exports = {
           row.ability_id === undefined || row.ability_id === null
             ? null
             : Number(row.ability_id);
+        const baseCompletionPercent = Number(row.completion_percent || 0);
+        const goalLevel = (row.goal_level || '').toUpperCase();
+        const totalTasks = Number(row.total_tasks || 0);
+        const finishedTasks = Number(row.finished_tasks || 0);
+        const achievedScore = Number(row.achieved_score || 0);
+        const maxScore = Number(row.max_score || 0);
+
+        // 根据 goal_level 使用不同的计算公式
+        let adjustedCompletionPercent = baseCompletionPercent;
+        let calculationMethod = 'standard';
+        let threshold = 0;
+
+        if (goalLevel === 'H') {
+          // H (High): 高优先级 - 使用加权计算，要求更高完成度
+          // 公式：基础完成度 * 1.15，但不超过100%，且需要达到80%才算合格
+          adjustedCompletionPercent = Math.min(baseCompletionPercent * 1.15, 100);
+          calculationMethod = 'weighted_high';
+          threshold = 80;
+        } else if (goalLevel === 'M') {
+          // M (Medium): 中等优先级 - 标准计算
+          // 公式：标准完成度，需要达到70%才算合格
+          adjustedCompletionPercent = baseCompletionPercent;
+          calculationMethod = 'standard';
+          threshold = 70;
+        } else if (goalLevel === 'L') {
+          // L (Low): 低优先级 - 使用降权计算，但要求较低
+          // 公式：基础完成度 * 0.95，需要达到60%才算合格
+          adjustedCompletionPercent = Math.min(baseCompletionPercent * 0.95, 100);
+          calculationMethod = 'weighted_low';
+          threshold = 60;
+        } else {
+          // 未设置级别：使用标准计算
+          adjustedCompletionPercent = baseCompletionPercent;
+          calculationMethod = 'standard';
+          threshold = 70;
+        }
+
         return {
+          // 下划线命名（兼容性）
           ability_id: abilityId,
           ability_name: row.ability_name,
           goal_level: row.goal_level,
-          total_tasks: Number(row.total_tasks || 0),
-          finished_tasks: Number(row.finished_tasks || 0),
-          achieved_score: Number(row.achieved_score || 0),
-          max_score: Number(row.max_score || 0),
-          completion_percent: Number(row.completion_percent || 0)
+          total_tasks: totalTasks,
+          finished_tasks: finishedTasks,
+          achieved_score: achievedScore,
+          max_score: maxScore,
+          completion_percent: adjustedCompletionPercent, // 使用调整后的完成度
+          threshold: threshold, // 合格阈值
+          // 驼峰命名（前端友好）
+          abilityId: abilityId,
+          abilityName: row.ability_name,
+          goalLevel: row.goal_level,
+          totalTasks: totalTasks,
+          finishedTasks: finishedTasks,
+          achievedScore: achievedScore,
+          maxScore: maxScore,
+          completionPercent: adjustedCompletionPercent, // 使用调整后的完成度
+          threshold: threshold, // 合格阈值
+          achievementRate: adjustedCompletionPercent / 100 // 0-1 范围的达成率
         };
       });
 

@@ -20,11 +20,105 @@ module.exports = {
   async getTeamDetail(req, res) {
     try {
       const teamId = req.params.teamId;
-      const members = await sequelize.query(
-        'SELECT student_id, contribution, score, team_score FROM course_student_work WHERE group_id=? AND deleted=0',
+      
+      // 验证团队是否存在
+      const [team] = await sequelize.query(
+        'SELECT id, group_name, course_id FROM course_group WHERE id = ? AND deleted = 0',
         { replacements: [teamId], type: QueryTypes.SELECT }
       );
-      return res.json(members);
+      
+      if (!team) {
+        return res.status(404).json({ message: '团队不存在' });
+      }
+
+      // 获取团队成员（从 course_student 表）
+      const members = await sequelize.query(
+        `
+        SELECT
+          cs.id,
+          cs.student_id,
+          cs.leader AS isLeader,
+          u.username,
+          u.nickname AS name,
+          u.job_number AS jobNumber,
+          u.avatar_url
+        FROM course_student cs
+        JOIN \`user\` u ON u.id = cs.student_id
+        WHERE cs.group_id = ?
+          AND cs.deleted = 0
+          AND u.deleted = 0
+        ORDER BY cs.leader DESC, cs.id ASC
+        `,
+        { replacements: [teamId], type: QueryTypes.SELECT }
+      );
+
+      // 计算团队总分（从 course_student_work 表）
+      const [scoreResult] = await sequelize.query(
+        `
+        SELECT
+          SUM(IFNULL(score, 0)) AS totalScore
+        FROM course_student_work
+        WHERE group_id = ?
+          AND deleted = 0
+        `,
+        { replacements: [teamId], type: QueryTypes.SELECT }
+      );
+
+      const totalScore = Number(scoreResult?.totalScore || 0);
+
+      // 计算每个成员的贡献度（基于作业提交情况）
+      const memberScores = await sequelize.query(
+        `
+        SELECT
+          student_id,
+          COUNT(*) AS submissionCount,
+          SUM(IFNULL(score, 0)) AS totalScore
+        FROM course_student_work
+        WHERE group_id = ?
+          AND deleted = 0
+        GROUP BY student_id
+        `,
+        { replacements: [teamId], type: QueryTypes.SELECT }
+      );
+
+      const scoreMap = {};
+      memberScores.forEach(ms => {
+        scoreMap[ms.student_id] = {
+          submissionCount: Number(ms.submissionCount || 0),
+          totalScore: Number(ms.totalScore || 0)
+        };
+      });
+
+      const totalSubmissions = memberScores.reduce((sum, ms) => sum + Number(ms.submissionCount || 0), 0);
+
+      // 为每个成员添加贡献度和分数
+      const membersWithStats = members.map(member => {
+        const stats = scoreMap[member.student_id] || { submissionCount: 0, totalScore: 0 };
+        const contributionRate = totalSubmissions > 0 
+          ? stats.submissionCount / totalSubmissions 
+          : 1 / members.length; // 如果没有提交记录，平均分配
+
+        return {
+          ...member,
+          // 确保学号字段正确返回（兼容多种命名）
+          studentId: member.jobNumber || member.job_number || '',
+          jobNumber: member.jobNumber || member.job_number || '',
+          job_number: member.jobNumber || member.job_number || '',
+          contributionRate: contributionRate,
+          contribution: Math.round(contributionRate * 100),
+          score: stats.totalScore
+        };
+      });
+
+      return res.json({
+        team: {
+          id: team.id,
+          groupName: team.group_name,
+          courseId: team.course_id,
+          totalScore: totalScore
+        },
+        members: membersWithStats
+      });
     } catch (err) {
       return res.status(500).json({ message: '获取团队详情失败', error: err.message });
     }
@@ -36,8 +130,11 @@ module.exports = {
       const userId = req.user.id;
       const sql = `
         SELECT
+          g.id AS teamId,
           g.id AS group_id,
+          g.group_name AS groupName,
           g.group_name,
+          g.course_id AS courseId,
           g.course_id,
           c.course_name,
           c.course_desc,
@@ -51,12 +148,31 @@ module.exports = {
           ON g.course_id = c.course_id AND c.deleted = 0
         WHERE cs.deleted = 0
           AND cs.student_id = ?
+          AND cs.group_id IS NOT NULL
         ORDER BY g.course_id, g.sort, g.id`;
       const rows = await sequelize.query(sql, {
         replacements: [userId],
         type: QueryTypes.SELECT
       });
-      return res.json(rows);
+
+      // 为每个团队计算总分
+      const teamsWithScore = await Promise.all(rows.map(async (team) => {
+        const [scoreResult] = await sequelize.query(
+          `
+          SELECT SUM(IFNULL(score, 0)) AS totalScore
+          FROM course_student_work
+          WHERE group_id = ? AND deleted = 0
+          `,
+          { replacements: [team.teamId], type: QueryTypes.SELECT }
+        );
+        return {
+          ...team,
+          score: Number(scoreResult?.totalScore || 0),
+          totalScore: Number(scoreResult?.totalScore || 0)
+        };
+      }));
+
+      return res.json(teamsWithScore);
     } catch (err) {
       return res.status(500).json({ message: '获取我的团队失败', error: err.message });
     }
