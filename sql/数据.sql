@@ -3,7 +3,8 @@
 
 SET FOREIGN_KEY_CHECKS = 0;
 
------------------------INSERT INTO `user` (
+-----------------------
+INSERT INTO `user` (
   id,
   username, password_hash, nickname,
   user_role, status,

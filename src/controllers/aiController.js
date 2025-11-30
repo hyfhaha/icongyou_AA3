@@ -1,13 +1,14 @@
 const axios = require('axios');
 
 async function callLLM({ prompt, storyId, type }) {
-  if (!process.env.OPENAI_API_KEY && !process.env.LLM_API) {
+  // 1）优先使用自定义 LLM_API，便于在学校/企业内部替换模型服务
+  // 2）否则使用智谱 AI 官方接口（需要 ZHIPU_API_KEY）
+  if (!process.env.ZHIPU_API_KEY && !process.env.LLM_API) {
     const error = new Error('AI service not configured');
     error.code = 'NO_AI';
     throw error;
   }
 
-  // 优先走自定义 LLM_API，便于在学校/企业内部替换模型服务
   if (process.env.LLM_API) {
     const payload = { prompt, storyId, type };
     const r = await axios.post(process.env.LLM_API, payload);
@@ -15,12 +16,17 @@ async function callLLM({ prompt, storyId, type }) {
     return r.data.answer || r.data.result || r.data;
   }
 
-  // 默认走 OpenAI 官方接口
+  // 默认走 智谱大模型 Chat Completions 接口
   const messages = [];
-  if (type === 'generate') {
+  if (type === 'qa') {
     messages.push({
       role: 'system',
-      content: '你是一名写作助手，请根据用户提供的内容给出结构优化和写作建议，注意条理清晰、分点输出。'
+      content: '你是一个有用的AI助手，请用中文回答用户的问题。回答要准确、清晰、有条理。'
+    });
+  } else if (type === 'generate') {
+    messages.push({
+      role: 'system',
+      content: '你是一名写作助手，请根据用户提供的内容给出结构优化和写作建议，注意条理清晰、分点输出。请用中文回答。'
     });
   } else if (type === 'summary') {
     messages.push({
@@ -30,22 +36,47 @@ async function callLLM({ prompt, storyId, type }) {
   } else if (type === 'comment') {
     messages.push({
       role: 'system',
-      content: '你是一名课程教师，请根据作业内容给出客观、具体、可操作的点评建议，可适当分条列出优点和改进建议。'
+      content: '你是一名课程教师，请根据作业内容给出客观、具体、可操作的点评建议，可适当分条列出优点和改进建议。请用中文回答。'
     });
   }
 
   messages.push({ role: 'user', content: prompt });
 
-  const r = await axios.post(
-    'https://api.openai.com/v1/chat/completions',
-    {
-      model: 'gpt-4o-mini',
-      messages
-    },
-    { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } }
-  );
+  // 调试：打印实际发送的数据
+  console.log('[AI Debug] 发送给智谱API的数据:');
+  console.log(JSON.stringify({ model: 'glm-4.6', messages }, null, 2));
 
-  return r.data.choices[0].message.content;
+  try {
+    const r = await axios.post(
+      'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      {
+        model: 'glm-4.6',
+        messages,
+        temperature: 0.6,
+        stream: false
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.ZHIPU_API_KEY}`
+        }
+      }
+    );
+
+    // 调试：打印智谱API的响应
+    console.log('[AI Debug] 智谱API响应结构:', JSON.stringify(r.data, null, 2));
+
+    // 检查响应格式
+    if (r.data && r.data.choices && r.data.choices[0] && r.data.choices[0].message) {
+      return r.data.choices[0].message.content;
+    } else {
+      console.error('[AI Error] 智谱API响应格式异常:', r.data);
+      throw new Error('智谱API响应格式异常');
+    }
+  } catch (error) {
+    console.error('[AI Error] 智谱API调用失败:', error.response?.data || error.message);
+    throw error;
+  }
 }
 
 module.exports = {
