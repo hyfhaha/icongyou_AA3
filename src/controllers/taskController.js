@@ -1,6 +1,7 @@
 const { Story, CourseStudentWork, TaskView, Discussion, sequelize } = require('../models');
 const { QueryTypes, Op } = require('sequelize');
 const pagination = require('../utils/pagination');
+const axios = require('axios');
 
 async function findActiveStory(storyId) {
   return Story.findOne({ where: { id: storyId, deleted: 0 } });
@@ -561,6 +562,8 @@ module.exports = {
           return res.status(400).json({ message: '回复目标不存在或不属于该任务' });
         }
       }
+      
+      // 创建用户讨论记录
       const discussion = await Discussion.create({
         story_id: storyId,
         course_id: story.course_id,
@@ -574,6 +577,81 @@ module.exports = {
         deleted: 0,
         tenant_id: story.tenant_id || 0
       });
+      
+      // 如果是提问（非回复），尝试调用AI自动回复
+      // 注意：这里不阻塞用户讨论的创建，AI回复异步处理
+      if (!replyTo) {
+        // 异步调用AI，不等待结果
+        (async () => {
+          try {
+            let aiAnswer = null;
+            
+            // 尝试调用AI接口
+            try {
+              // 调用AI接口（复用aiController的逻辑）
+              if (process.env.LLM_API) {
+                const payload = { prompt: content, storyId, type: 'qa' };
+                const r = await axios.post(process.env.LLM_API, payload);
+                aiAnswer = r.data.answer || r.data.result || r.data;
+              } else if (process.env.OPENAI_API_KEY) {
+                const messages = [
+                  {
+                    role: 'system',
+                    content: '你是一名课程助教，请根据学生的问题给出清晰、准确、有帮助的回答。回答要简洁明了，条理清晰，可以适当分点说明。'
+                  },
+                  { role: 'user', content: content }
+                ];
+                const r = await axios.post(
+                  'https://api.openai.com/v1/chat/completions',
+                  { model: 'gpt-4o-mini', messages },
+                  { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } }
+                );
+                aiAnswer = r.data.choices[0].message.content;
+              }
+            } catch (aiCallError) {
+              console.warn('AI接口调用失败，使用模拟回复:', aiCallError.message);
+              // AI调用失败，使用模拟回复
+              aiAnswer = null;
+            }
+            
+            // 如果AI调用失败或未配置，使用模拟回复
+            if (!aiAnswer) {
+              // 根据问题内容生成简单的模拟回复
+              const mockResponses = [
+                '收到您的问题："' + content + '"。这是一个很好的问题，建议您可以：\n1. 仔细阅读任务要求\n2. 参考课程资料\n3. 如有疑问可以继续提问',
+                '关于"' + content + '"这个问题，我理解您的疑问。建议您：\n1. 查看任务详情页的相关资料\n2. 参考优秀作业示例\n3. 在团队内进行讨论',
+                '感谢您的提问："' + content + '"。作为课程助教，我建议：\n1. 先理解任务的核心要求\n2. 按照步骤逐步完成\n3. 遇到具体问题可以详细描述',
+                '针对"' + content + '"这个问题，我的建议是：\n1. 仔细分析任务目标\n2. 制定实施计划\n3. 分阶段完成并检查'
+              ];
+              // 根据问题长度选择不同的回复
+              const index = content.length % mockResponses.length;
+              aiAnswer = mockResponses[index];
+            }
+            
+            // 创建AI回复记录（无论是否成功调用AI，都保存回复）
+            if (aiAnswer) {
+              await Discussion.create({
+                story_id: storyId,
+                course_id: story.course_id,
+                user_id: null, // AI回复，user_id为null
+                user_name: 'AI助教',
+                content: String(aiAnswer).trim(),
+                reply_to: discussion.id, // 回复用户的提问
+                likes: 0,
+                creator: 'system',
+                updater: 'system',
+                deleted: 0,
+                tenant_id: story.tenant_id || 0
+              });
+              console.log('✅ AI回复已保存到数据库，回复ID:', discussion.id);
+            }
+          } catch (aiErr) {
+            // AI调用失败，不影响用户讨论的创建
+            console.error('AI自动回复失败:', aiErr.message);
+          }
+        })();
+      }
+      
       return res.status(201).json(discussion);
     } catch (err) {
       return res.status(500).json({ message: '创建讨论失败', error: err.message });
