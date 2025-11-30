@@ -80,6 +80,7 @@ async function callLLM({ prompt, storyId, type }) {
 }
 
 module.exports = {
+  callLLM, // 导出 callLLM 函数供其他模块使用
   // POST /api/ai/ask
   async ask(req, res) {
     try {

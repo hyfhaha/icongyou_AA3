@@ -1,7 +1,6 @@
 const { Story, CourseStudentWork, TaskView, Discussion, sequelize } = require('../models');
 const { QueryTypes, Op } = require('sequelize');
 const pagination = require('../utils/pagination');
-const axios = require('axios');
 
 async function findActiveStory(storyId) {
   return Story.findOne({ where: { id: storyId, deleted: 0 } });
@@ -586,28 +585,15 @@ module.exports = {
           try {
             let aiAnswer = null;
             
-            // 尝试调用AI接口
+            // 使用 aiController 的 callLLM 函数
             try {
-              // 调用AI接口（复用aiController的逻辑）
-              if (process.env.LLM_API) {
-                const payload = { prompt: content, storyId, type: 'qa' };
-                const r = await axios.post(process.env.LLM_API, payload);
-                aiAnswer = r.data.answer || r.data.result || r.data;
-              } else if (process.env.OPENAI_API_KEY) {
-                const messages = [
-                  {
-                    role: 'system',
-                    content: '你是一名课程助教，请根据学生的问题给出清晰、准确、有帮助的回答。回答要简洁明了，条理清晰，可以适当分点说明。'
-                  },
-                  { role: 'user', content: content }
-                ];
-                const r = await axios.post(
-                  'https://api.openai.com/v1/chat/completions',
-                  { model: 'gpt-4o-mini', messages },
-                  { headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` } }
-                );
-                aiAnswer = r.data.choices[0].message.content;
-              }
+              const aiController = require('./aiController');
+              aiAnswer = await aiController.callLLM({
+                prompt: content,
+                storyId: storyId,
+                type: 'qa'
+              });
+              console.log('✅ AI回复成功获取');
             } catch (aiCallError) {
               console.warn('AI接口调用失败，使用模拟回复:', aiCallError.message);
               // AI调用失败，使用模拟回复
