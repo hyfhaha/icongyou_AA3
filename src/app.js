@@ -55,7 +55,13 @@ app.use('/api/view', authMiddleware, require('./routes/view'));
 
 // upload route
 app.post('/api/upload', authMiddleware, upload.single('file'), require('./controllers/uploadController').uploadLocal);
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+// 静态文件下载：禁用 Range 避免部分端发起非法范围请求导致 416
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, '..', 'uploads'), {
+    acceptRanges: false
+  })
+);
 
 app.get('/', (req, res) => res.json({ status: 'ok' }));
 
