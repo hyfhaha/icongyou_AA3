@@ -253,6 +253,21 @@ module.exports = {
     try {
       const userId = req.user.id;
       const limitOffset = pagination(req);
+      const { courseType, q } = req.query;
+
+      const whereParts = ['cs.deleted = 0', 'cs.student_id = ?'];
+      const replacements = [userId];
+
+      if (courseType !== undefined && courseType !== null && courseType !== '') {
+        whereParts.push('c.course_type = ?');
+        replacements.push(Number(courseType));
+      }
+
+      if (q && String(q).trim()) {
+        whereParts.push('c.course_name LIKE ?');
+        replacements.push(`%${String(q).trim()}%`);
+      }
+
       // 以当前用户在 course_student 表中的课程为主，拼接课程信息与完成情况
       const sql = `
         SELECT
@@ -260,11 +275,14 @@ module.exports = {
           c.course_name,
           c.course_desc,
           c.course_pic,
+          c.course_type,
+          c.semester,
           c.start_time,
           c.end_time,
           IFNULL(v.total_score, 0) AS total_score,
           IFNULL(v.tasks_done, 0) AS tasks_done,
           IFNULL(all_tasks.total_tasks, 0) AS total_tasks,
+          IFNULL(cs_count.student_count, 0) AS student_count,
           CASE
             WHEN IFNULL(all_tasks.total_tasks, 0) = 0 THEN 0
             ELSE ROUND(IFNULL(v.tasks_done, 0) / all_tasks.total_tasks * 100, 1)
@@ -288,13 +306,21 @@ module.exports = {
           WHERE deleted = 0
           GROUP BY course_id
         ) AS all_tasks ON all_tasks.course_id = c.course_id
-        WHERE cs.deleted = 0 AND cs.student_id = ?
+        LEFT JOIN (
+          SELECT course_id, COUNT(DISTINCT student_id) AS student_count
+          FROM course_student
+          WHERE deleted = 0
+          GROUP BY course_id
+        ) AS cs_count ON cs_count.course_id = c.course_id
+        WHERE ${whereParts.join(' AND ')}
         GROUP BY
           c.course_id, c.course_name, c.course_desc, c.course_pic,
-          c.start_time, c.end_time, v.total_score, v.tasks_done, all_tasks.total_tasks
+          c.course_type, c.semester, c.start_time, c.end_time,
+          v.total_score, v.tasks_done, all_tasks.total_tasks, cs_count.student_count
         LIMIT ? OFFSET ?`;
+      replacements.push(limitOffset.limit, limitOffset.offset);
       const rows = await sequelize.query(sql, {
-        replacements: [userId, limitOffset.limit, limitOffset.offset],
+        replacements,
         type: QueryTypes.SELECT
       });
       const formatted = rows.map((row) => ({

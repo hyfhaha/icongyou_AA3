@@ -37,7 +37,7 @@ module.exports = {
         SELECT
           cs.id,
           cs.student_id,
-          cs.leader AS isLeader,
+          CAST(cs.leader AS UNSIGNED) AS isLeader,
           u.username,
           u.nickname AS name,
           u.job_number AS jobNumber,
@@ -65,6 +65,31 @@ module.exports = {
       );
 
       const totalScore = Number(scoreResult?.totalScore || 0);
+
+      // 计算所在课程下团队排名
+      const rankingRows = await sequelize.query(
+        `
+        SELECT
+          g.id AS teamId,
+          IFNULL(SUM(IFNULL(w.score, 0)), 0) AS totalScore
+        FROM course_group g
+        LEFT JOIN course_student_work w
+          ON w.group_id = g.id
+          AND w.deleted = 0
+        WHERE g.course_id = ?
+          AND g.deleted = 0
+        GROUP BY g.id
+        ORDER BY totalScore DESC, g.id ASC
+        `,
+        { replacements: [team.course_id], type: QueryTypes.SELECT }
+      );
+
+      let teamRank = null;
+      rankingRows.forEach((row, index) => {
+        if (Number(row.teamId) === Number(teamId)) {
+          teamRank = index + 1;
+        }
+      });
 
       // 计算每个成员的贡献度（基于作业提交情况）
       const memberScores = await sequelize.query(
@@ -116,7 +141,9 @@ module.exports = {
           id: team.id,
           groupName: team.group_name,
           courseId: team.course_id,
-          totalScore: totalScore
+          totalScore: totalScore,
+          rank: teamRank,
+          rankTotal: rankingRows.length
         },
         members: membersWithStats
       });
