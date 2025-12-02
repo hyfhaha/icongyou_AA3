@@ -1,5 +1,35 @@
-const { sequelize } = require('../models');
+const { sequelize, Course } = require('../models');
 const { QueryTypes } = require('sequelize');
+
+// 生成全局唯一的小组邀请码（由大写字母和数字组成）
+async function generateUniqueGroupCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 去掉易混淆字符
+
+  // 理论上碰撞概率极低，如有碰撞则重试
+  // 如果后续需要更高唯一性保障，可以改为在 DB 中加唯一索引
+  // 或增加位数
+  // 这里采用简单循环重试的方式
+  // 注意：这是一个后端内部函数，不对外暴露
+  // 保证在 course_group 表中全局唯一（所有课程之间也不重复）
+  /* eslint-disable no-constant-condition */
+  while (true) {
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      const idx = Math.floor(Math.random() * chars.length);
+      code += chars.charAt(idx);
+    }
+
+    const [exist] = await sequelize.query(
+      'SELECT id FROM course_group WHERE group_code = ? AND deleted = 0 LIMIT 1',
+      { replacements: [code], type: QueryTypes.SELECT }
+    );
+
+    if (!exist) {
+      return code;
+    }
+  }
+  /* eslint-enable no-constant-condition */
+}
 
 module.exports = {
   // GET /api/teams/:storyId
@@ -233,11 +263,29 @@ module.exports = {
     }
   },
 
-  // POST /api/teams/course/:courseId   创建团队（默认仅教师/助教等在路由层做权限控制）
+  // POST /api/teams/course/:courseId   创建团队
+  // - 教师/助教/管理员：按原逻辑创建团队
+  // - 学生（role=0）：如果课程允许学生自建团队，则创建团队 + 自动加入并成为队长
   async createTeam(req, res) {
     try {
       const courseId = req.params.courseId;
-      const { group_name, max_size, group_code } = req.body || {};
+      const { group_name, max_size } = req.body || {};
+      const userId = req.user && req.user.id;
+      const userRole = req.user && req.user.user_role; // 0 学生,1 教师,2 企业用户,3 管理员
+
+      // 如果是学生创建团队，需要检查课程配置是否允许学生自建团队
+      if (userRole === 0) {
+        const course = await Course.findOne({
+          where: { course_id: courseId, deleted: false }
+        });
+        if (!course) {
+          return res.status(404).json({ message: '课程不存在' });
+        }
+        if (!course.student_allow_team) {
+          return res.status(403).json({ message: '当前课程不允许学生创建团队' });
+        }
+      }
+
       if (!group_name || !String(group_name).trim()) {
         return res.status(400).json({ message: 'group_name 为必填项' });
       }
@@ -247,11 +295,14 @@ module.exports = {
           ? null
           : Number(max_size);
 
+      // 生成唯一邀请码（忽略前端传入的 group_code，统一由后端生成）
+      const groupCode = await generateUniqueGroupCode();
+
       // 创建小组
       const [result] = await sequelize.query(
         'INSERT INTO course_group (course_id, group_name, max_size, group_code) VALUES (?, ?, ?, ?)',
         {
-          replacements: [courseId, name, maxSizeVal, group_code || null],
+          replacements: [courseId, name, maxSizeVal, groupCode],
           type: QueryTypes.INSERT
         }
       );
@@ -259,6 +310,33 @@ module.exports = {
       const newId = result && typeof result === 'object' && result.insertId
         ? result.insertId
         : result;
+
+      // 自动让学生创建者加入团队并成为队长
+      if (userRole === 0 && userId) {
+        // 查找或创建 course_student 记录
+        const [record] = await sequelize.query(
+          'SELECT * FROM course_student WHERE course_id = ? AND student_id = ? AND deleted = 0 LIMIT 1',
+          { replacements: [courseId, userId], type: QueryTypes.SELECT }
+        );
+
+        if (record) {
+          await sequelize.query(
+            'UPDATE course_student SET group_id = ?, leader = 1 WHERE id = ?',
+            { replacements: [newId, record.id], type: QueryTypes.UPDATE }
+          );
+        } else {
+          await sequelize.query(
+            'INSERT INTO course_student (course_id, student_id, group_id, leader) VALUES (?, ?, ?, 1)',
+            { replacements: [courseId, userId, newId], type: QueryTypes.INSERT }
+          );
+        }
+
+        // 更新小组当前人数为 +1
+        await sequelize.query(
+          'UPDATE course_group SET current_size = COALESCE(current_size, 0) + 1 WHERE id = ?',
+          { replacements: [newId], type: QueryTypes.UPDATE }
+        );
+      }
 
       const [team] = await sequelize.query(
         'SELECT id AS group_id, group_name, course_id, max_size, current_size, group_code, sort FROM course_group WHERE id = ?',
@@ -268,6 +346,83 @@ module.exports = {
       return res.status(201).json({ message: '创建团队成功', team });
     } catch (err) {
       return res.status(500).json({ message: '创建团队失败', error: err.message });
+    }
+  },
+
+  // POST /api/teams/join-by-code   通过邀请码加入团队（学生）
+  async joinTeamByCode(req, res) {
+    try {
+      const userId = req.user.id;
+      const { inviteCode } = req.body || {};
+
+      if (!inviteCode || !String(inviteCode).trim()) {
+        return res.status(400).json({ message: 'inviteCode 为必填项' });
+      }
+
+      const code = String(inviteCode).trim().toUpperCase();
+
+      // 查找对应小组
+      const [group] = await sequelize.query(
+        'SELECT * FROM course_group WHERE group_code = ? AND deleted = 0 LIMIT 1',
+        { replacements: [code], type: QueryTypes.SELECT }
+      );
+
+      if (!group) {
+        return res.status(404).json({ message: '邀请码无效或小组不存在' });
+      }
+
+      const courseId = group.course_id;
+
+      // 检查课程是否允许通过邀请码加入
+      const course = await Course.findOne({
+        where: { course_id: courseId, deleted: false }
+      });
+      if (!course) {
+        return res.status(404).json({ message: '课程不存在' });
+      }
+      if (!course.student_allow_join) {
+        return res.status(403).json({ message: '当前课程不允许通过邀请码加入团队' });
+      }
+
+      // 人数上限检查
+      const currentSize = Number(group.current_size || 0);
+      const maxSize = group.max_size != null ? Number(group.max_size) : null;
+      if (maxSize != null && currentSize >= maxSize) {
+        return res.status(400).json({ message: '小组人数已满' });
+      }
+
+      // 查询当前在该课程下的记录
+      const [record] = await sequelize.query(
+        'SELECT * FROM course_student WHERE course_id = ? AND student_id = ? AND deleted = 0 LIMIT 1',
+        { replacements: [courseId, userId], type: QueryTypes.SELECT }
+      );
+
+      if (record && String(record.group_id) === String(group.id)) {
+        return res.json({ message: '已加入该小组', course_id: courseId, group_id: Number(group.id) });
+      }
+
+      // 更新或插入 course_student 记录（保持与 joinTeam 一致的行为）
+      if (record) {
+        await sequelize.query(
+          'UPDATE course_student SET group_id = ? WHERE id = ?',
+          { replacements: [group.id, record.id], type: QueryTypes.UPDATE }
+        );
+      } else {
+        await sequelize.query(
+          'INSERT INTO course_student (course_id, student_id, group_id, leader) VALUES (?, ?, ?, 0)',
+          { replacements: [courseId, userId, group.id], type: QueryTypes.INSERT }
+        );
+      }
+
+      // 更新小组当前人数
+      await sequelize.query(
+        'UPDATE course_group SET current_size = COALESCE(current_size, 0) + 1 WHERE id = ?',
+        { replacements: [group.id], type: QueryTypes.UPDATE }
+      );
+
+      return res.json({ message: '加入小组成功', course_id: courseId, group_id: Number(group.id) });
+    } catch (err) {
+      return res.status(500).json({ message: '通过邀请码加入小组失败', error: err.message });
     }
   },
 

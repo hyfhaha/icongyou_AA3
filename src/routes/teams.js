@@ -9,8 +9,13 @@ router.get('/user', ctrl.getMyTeams);
 // 查看某课程下所有团队
 router.get('/course/:courseId', ctrl.getCourseTeams);
 
-// 在某课程下创建团队（仅教师/助教/管理员）
-router.post('/course/:courseId', roleAuth([1, 2, 3]), ctrl.createTeam);
+// 在某课程下创建团队
+// - 教师/助教/管理员：按原逻辑创建团队
+// - 学生：在课程允许 student_allow_team=1 的前提下，可以创建团队，并自动加入为队长
+router.post('/course/:courseId', roleAuth([0, 1, 2, 3]), ctrl.createTeam);
+
+// 通过邀请码加入团队（学生）
+router.post('/join/by-code', roleAuth([0]), ctrl.joinTeamByCode);
 
 // 加入团队（学生）
 router.post('/:teamId/join', roleAuth([0]), ctrl.joinTeam);

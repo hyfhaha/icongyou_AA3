@@ -9,8 +9,13 @@ async function callLLM({ prompt, storyId, type }) {
     throw error;
   }
 
+  // 统一的字数限制要求
+  const lengthRequirement = '\n\n【重要要求】生成内容必须在100字以内。';
+
   if (process.env.LLM_API) {
-    const payload = { prompt, storyId, type };
+    // 对于自定义LLM_API，在prompt末尾添加字数限制要求
+    const enhancedPrompt = prompt + lengthRequirement;
+    const payload = { prompt: enhancedPrompt, storyId, type };
     const r = await axios.post(process.env.LLM_API, payload);
     // 约定优先从 answer 字段读结果；否则直接返回原始响应
     return r.data.answer || r.data.result || r.data;
@@ -21,26 +26,28 @@ async function callLLM({ prompt, storyId, type }) {
   if (type === 'qa') {
     messages.push({
       role: 'system',
-      content: '你是一个有用的AI助手，请用中文回答用户的问题。回答要准确、清晰、有条理。'
+      content: '你是一个有用的AI助手，请用中文回答用户的问题。回答要准确、清晰、有条理。生成内容必须在100字以内。'
     });
   } else if (type === 'generate') {
     messages.push({
       role: 'system',
-      content: '你是一名写作助手，请根据用户提供的内容给出结构优化和写作建议，注意条理清晰、分点输出。请用中文回答。'
+      content: '你是一名写作助手，请根据用户提供的内容给出结构优化和写作建议，注意条理清晰、分点输出。请用中文回答。生成内容必须在100字以内。'
     });
   } else if (type === 'summary') {
     messages.push({
       role: 'system',
-      content: '你是一名总结助手，请在保留关键信息的前提下，用简洁的中文为用户内容生成摘要。'
+      content: '你是一名总结助手，请在保留关键信息的前提下，用简洁的中文为用户内容生成摘要。生成内容必须在100字以内。'
     });
   } else if (type === 'comment') {
     messages.push({
       role: 'system',
-      content: '你是一名课程教师，请根据作业内容给出客观、具体、可操作的点评建议，可适当分条列出优点和改进建议。请用中文回答。'
+      content: '你是一名课程教师，请根据作业内容给出客观、具体、可操作的点评建议，可适当分条列出优点和改进建议。请用中文回答。生成内容必须在100字以内。'
     });
   }
 
-  messages.push({ role: 'user', content: prompt });
+  // 在user prompt末尾也添加字数限制要求作为双重保障
+  const enhancedPrompt = prompt + lengthRequirement;
+  messages.push({ role: 'user', content: enhancedPrompt });
 
   // 调试：打印实际发送的数据
   console.log('[AI Debug] 发送给智谱API的数据:');
