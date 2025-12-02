@@ -35,8 +35,7 @@ DELETE FROM course WHERE course_id BETWEEN 1001 AND 1005;
 DELETE FROM `user` WHERE id BETWEEN 100 AND 220;
 
 --
--- 1. 用户：老师 + 15个学生（主角201 + 其他202-215）
---   为学号、手机号、邮箱等字段填充虚拟数据
+-- 1. 用户：老师 + 15个学生（主角201 + 其他202-215），补全学号/手机号/邮箱等字段
 INSERT INTO `user` (
   id, username, password_hash, nickname,
   dept_id, email, phone_number, job_number,
@@ -68,10 +67,10 @@ INSERT INTO `user` (
   (214, 'stu214', '123456', '学生214', 101, '214001@example.com', '13900002014', 'S214', 0, 1, 0, 0),
   (215, 'stu215', '123456', '学生215', 101, '215001@example.com', '13900002015', 'S215', 0, 1, 0, 0)
 ON DUPLICATE KEY UPDATE
-  username = VALUES(username),
-  nickname = VALUES(nickname),
-  user_role = VALUES(user_role),
-  email    = VALUES(email),
+  username     = VALUES(username),
+  nickname     = VALUES(nickname),
+  user_role    = VALUES(user_role),
+  email        = VALUES(email),
   phone_number = VALUES(phone_number),
   job_number   = VALUES(job_number);
 
@@ -531,16 +530,20 @@ INSERT INTO discussions (
 --
 INSERT INTO `user` (
   id, username, password_hash, nickname,
+  dept_id, email, phone_number, job_number,
   user_role, status, deleted, tenant_id
 ) VALUES
-  (216, 'stu216', '123456', '学生216', 0, 1, 0, 0),
-  (217, 'stu217', '123456', '学生217', 0, 1, 0, 0),
-  (218, 'stu218', '123456', '学生218', 0, 1, 0, 0),
-  (219, 'stu219', '123456', '学生219', 0, 1, 0, 0),
-  (220, 'stu220', '123456', '学生220', 0, 1, 0, 0)
+  (216, 'stu216', '123456', '学生216', 101, '216001@example.com', '13900002216', 'S216', 0, 1, 0, 0),
+  (217, 'stu217', '123456', '学生217', 101, '217001@example.com', '13900002217', 'S217', 0, 1, 0, 0),
+  (218, 'stu218', '123456', '学生218', 101, '218001@example.com', '13900002218', 'S218', 0, 1, 0, 0),
+  (219, 'stu219', '123456', '学生219', 101, '219001@example.com', '13900002219', 'S219', 0, 1, 0, 0),
+  (220, 'stu220', '123456', '学生220', 101, '220001@example.com', '13900002220', 'S220', 0, 1, 0, 0)
 ON DUPLICATE KEY UPDATE
-  username = VALUES(username),
-  nickname = VALUES(nickname);
+  username     = VALUES(username),
+  nickname     = VALUES(nickname),
+  email        = VALUES(email),
+  phone_number = VALUES(phone_number),
+  job_number   = VALUES(job_number);
 
 --
 -- 2. 为现有课程再增加一些小组和选课记录
@@ -773,6 +776,45 @@ ON DUPLICATE KEY UPDATE
   content = VALUES(content);
 
 --
+-- 统一已打分作业的点评状态与评语
+-- 对于有分数的作业：标记为已点评，补充评分人/时间/评语等字段
+--
+UPDATE course_student_work
+SET
+  status      = 1,
+  score_by    = CASE course_id
+                  WHEN 1001 THEN 100
+                  WHEN 1002 THEN 101
+                  WHEN 1003 THEN 102
+                  WHEN 1004 THEN 103
+                  ELSE score_by
+                END,
+  score_time  = IF(score_time IS NULL, DATE_SUB(CURDATE(), INTERVAL 1 DAY), score_time),
+  content     = COALESCE(
+                  content,
+                  CONCAT('本次作业得分 ', score, ' 分，整体完成较好，请根据老师建议继续完善。')
+                ),
+  round       = COALESCE(round, 1),
+  last_one    = COALESCE(last_one, 1)
+WHERE course_id BETWEEN 1001 AND 1005
+  AND deleted = b'0'
+  AND score IS NOT NULL;
+
+--
+-- 为 course_map_story 补充缺省字段（必做 / 难度 / 最大提交次数 / 解锁方式）
+--
+UPDATE course_map_story
+SET
+  required    = COALESCE(required, b'1'),
+  difficulty  = COALESCE(difficulty, 3),
+  max_submit  = COALESCE(max_submit, 3),
+  submit_type = COALESCE(submit_type, 2),
+  unlock_type = COALESCE(unlock_type, 3)
+WHERE course_id BETWEEN 1001 AND 1005
+  AND deleted = b'0';
+
+--
+>>>>>>> a45e39a (四类资源)
 -- 调整任务时间到距离当前日期附近，划分为三类：已过期 / 进行中 / 未开始
 -- 说明：使用 CURDATE() 使脚本在不同时间执行都能生成“接近现在”的时间
 --   已过期：开始和结束都早于今天（约 60~30 天前）

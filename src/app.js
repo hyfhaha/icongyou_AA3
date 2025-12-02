@@ -3,8 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const path = require('path');
-const multer = require('multer');
-const upload = multer({ dest: path.join(__dirname, '..', 'uploads') });
+const uploadMiddleware = require('./middleware/uploadMiddleware');
 const authMiddleware = require('./middleware/auth');
 const { sequelize } = require('./models');
 const pkg = require('../package.json');
@@ -53,8 +52,23 @@ app.use('/api/ai', authMiddleware, require('./routes/ai'));
 app.use('/api/user', authMiddleware, require('./routes/user'));
 app.use('/api/view', authMiddleware, require('./routes/view'));
 
-// upload route
-app.post('/api/upload', authMiddleware, upload.single('file'), require('./controllers/uploadController').uploadLocal);
+// upload route with type support (avatar, cover, icon, material)
+app.post('/api/upload/:type?', authMiddleware, (req, res, next) => {
+  uploadMiddleware.single('file')(req, res, (err) => {
+    if (err) {
+      // 处理 multer 文件验证错误
+      if (err.message && err.message.includes('任务资料仅支持')) {
+        return res.status(400).json({ message: err.message });
+      }
+      // 处理其他 multer 错误（如文件过大）
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ message: '文件大小超过100MB限制' });
+      }
+      return res.status(400).json({ message: err.message || '文件上传失败' });
+    }
+    next();
+  });
+}, require('./controllers/uploadController').uploadLocal);
 // 静态文件下载：禁用 Range 避免部分端发起非法范围请求导致 416
 app.use(
   '/uploads',
