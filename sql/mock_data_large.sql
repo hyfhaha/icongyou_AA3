@@ -39,40 +39,41 @@ DELETE FROM `user` WHERE id BETWEEN 100 AND 220;
 INSERT INTO `user` (
   id, username, password_hash, nickname,
   dept_id, email, phone_number, job_number,
-  user_role, status, deleted, tenant_id
+  user_role, status, deleted, tenant_id, avatar_url
 ) VALUES
   -- 老师（dept_id 设为 10，工号 T100+）
-  (100, 'teacher_zhang', '123456', '张老师', 10, 'teacher_zhang@example.com', '13800001000', 'T100', 1, 1, 0, 0),
-  (101, 'teacher_wang',  '123456', '王老师', 10, 'teacher_wang@example.com',  '13800001001', 'T101', 1, 1, 0, 0),
-  (102, 'teacher_li',    '123456', '李老师', 10, 'teacher_li@example.com',    '13800001002', 'T102', 1, 1, 0, 0),
-  (103, 'teacher_zhao',  '123456', '赵老师', 10, 'teacher_zhao@example.com',  '13800001003', 'T103', 1, 1, 0, 0),
-  (104, 'teacher_chen',  '123456', '陈老师', 10, 'teacher_chen@example.com',  '13800001004', 'T104', 1, 1, 0, 0),
+  (100, 'teacher_zhang', '123456', '张老师', 10, 'teacher_zhang@example.com', '13800001000', 'T100', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190544.png'),
+  (101, 'teacher_wang',  '123456', '王老师', 10, 'teacher_wang@example.com',  '13800001001', 'T101', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190602.png'),
+  (102, 'teacher_li',    '123456', '李老师', 10, 'teacher_li@example.com',    '13800001002', 'T102', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190615.png'),
+  (103, 'teacher_zhao',  '123456', '赵老师', 10, 'teacher_zhao@example.com',  '13800001003', 'T103', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190628.png'),
+  (104, 'teacher_chen',  '123456', '陈老师', 10, 'teacher_chen@example.com',  '13800001004', 'T104', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190544.png'),
 
-  -- 主角学生 201（dept_id 设为 101，学号 S201）
-  (201, 'hero_student', '123456', '主角学生', 101, '201001@example.com', '13900002001', 'S201', 0, 1, 0, 0),
+  -- 主角学生 201（dept_id 设为 101，学号 S201）- 优先分配头像
+  (201, 'hero_student', '123456', '主角学生', 101, '201001@example.com', '13900002001', 'S201', 0, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190506.png'),
 
-  -- 其他学生 202-215
-  (202, 'stu202', '123456', '学生202', 101, '202001@example.com', '13900002002', 'S202', 0, 1, 0, 0),
-  (203, 'stu203', '123456', '学生203', 101, '203001@example.com', '13900002003', 'S203', 0, 1, 0, 0),
-  (204, 'stu204', '123456', '学生204', 101, '204001@example.com', '13900002004', 'S204', 0, 1, 0, 0),
-  (205, 'stu205', '123456', '学生205', 101, '205001@example.com', '13900002005', 'S205', 0, 1, 0, 0),
-  (206, 'stu206', '123456', '学生206', 101, '206001@example.com', '13900002006', 'S206', 0, 1, 0, 0),
-  (207, 'stu207', '123456', '学生207', 101, '207001@example.com', '13900002007', 'S207', 0, 1, 0, 0),
-  (208, 'stu208', '123456', '学生208', 101, '208001@example.com', '13900002008', 'S208', 0, 1, 0, 0),
-  (209, 'stu209', '123456', '学生209', 101, '209001@example.com', '13900002009', 'S209', 0, 1, 0, 0),
-  (210, 'stu210', '123456', '学生210', 101, '210001@example.com', '13900002010', 'S210', 0, 1, 0, 0),
-  (211, 'stu211', '123456', '学生211', 101, '211001@example.com', '13900002011', 'S211', 0, 1, 0, 0),
-  (212, 'stu212', '123456', '学生212', 101, '212001@example.com', '13900002012', 'S212', 0, 1, 0, 0),
-  (213, 'stu213', '123456', '学生213', 101, '213001@example.com', '13900002013', 'S213', 0, 1, 0, 0),
-  (214, 'stu214', '123456', '学生214', 101, '214001@example.com', '13900002014', 'S214', 0, 1, 0, 0),
-  (215, 'stu215', '123456', '学生215', 101, '215001@example.com', '13900002015', 'S215', 0, 1, 0, 0)
+  -- 其他学生 202-215（暂时不分配头像，保持为空）
+  (202, 'stu202', '123456', '学生202', 101, '202001@example.com', '13900002002', 'S202', 0, 1, 0, 0, ''),
+  (203, 'stu203', '123456', '学生203', 101, '203001@example.com', '13900002003', 'S203', 0, 1, 0, 0, ''),
+  (204, 'stu204', '123456', '学生204', 101, '204001@example.com', '13900002004', 'S204', 0, 1, 0, 0, ''),
+  (205, 'stu205', '123456', '学生205', 101, '205001@example.com', '13900002005', 'S205', 0, 1, 0, 0, ''),
+  (206, 'stu206', '123456', '学生206', 101, '206001@example.com', '13900002006', 'S206', 0, 1, 0, 0, ''),
+  (207, 'stu207', '123456', '学生207', 101, '207001@example.com', '13900002007', 'S207', 0, 1, 0, 0, ''),
+  (208, 'stu208', '123456', '学生208', 101, '208001@example.com', '13900002008', 'S208', 0, 1, 0, 0, ''),
+  (209, 'stu209', '123456', '学生209', 101, '209001@example.com', '13900002009', 'S209', 0, 1, 0, 0, ''),
+  (210, 'stu210', '123456', '学生210', 101, '210001@example.com', '13900002010', 'S210', 0, 1, 0, 0, ''),
+  (211, 'stu211', '123456', '学生211', 101, '211001@example.com', '13900002011', 'S211', 0, 1, 0, 0, ''),
+  (212, 'stu212', '123456', '学生212', 101, '212001@example.com', '13900002012', 'S212', 0, 1, 0, 0, ''),
+  (213, 'stu213', '123456', '学生213', 101, '213001@example.com', '13900002013', 'S213', 0, 1, 0, 0, ''),
+  (214, 'stu214', '123456', '学生214', 101, '214001@example.com', '13900002014', 'S214', 0, 1, 0, 0, ''),
+  (215, 'stu215', '123456', '学生215', 101, '215001@example.com', '13900002015', 'S215', 0, 1, 0, 0, '')
 ON DUPLICATE KEY UPDATE
   username     = VALUES(username),
   nickname     = VALUES(nickname),
   user_role    = VALUES(user_role),
   email        = VALUES(email),
   phone_number = VALUES(phone_number),
-  job_number   = VALUES(job_number);
+  job_number   = VALUES(job_number),
+  avatar_url   = VALUES(avatar_url);
 
 --
 -- 2. 课程：5门课程，不同学期、不同类别
@@ -82,53 +83,54 @@ INSERT INTO course (
   course_id, course_name, course_desc, semester,
   start_time, end_time, lesson_status, show_score,
   course_type, course_hour, standard_team_num,
-  teacher_ids, teacher_names,
+  teacher_ids, teacher_names, course_pic,
   deleted, tenant_id
 ) VALUES
-  -- 课程1001：2024春，必修课
+  -- 课程1001：2024春，必修课（主角选的课程，优先分配封面）
   (1001, '软件工程实践', '系统学习软件工程全流程，包括需求分析、系统设计、编码实现、测试部署等环节。', '2024春',
    '2024-02-20 00:00:00', '2024-06-30 23:59:59',
    99, 1,
    3, 64, 5,
-   '100', '张老师',
+   '100', '张老师', '/uploads/images/covers/屏幕截图 2025-12-02 190040.png',
    b'0', 0),
 
-  -- 课程1002：2024秋，实训课
+  -- 课程1002：2024秋，实训课（主角选的课程，优先分配封面）
   (1002, 'Web全栈开发实训', '从前端到后端的完整开发实践，包含React、Node.js、数据库设计等。', '2024秋',
    '2024-09-01 00:00:00', '2024-12-31 23:59:59',
    1, 1,
    1, 80, 6,
-   '101', '王老师',
+   '101', '王老师', '/uploads/images/covers/屏幕截图 2025-12-02 190057.png',
    b'0', 0),
 
-  -- 课程1003：2024秋，选修课
+  -- 课程1003：2024秋，选修课（主角选的课程，优先分配封面）
   (1003, '人工智能基础', '介绍机器学习、深度学习基础理论，包含实践项目。', '2024秋',
    '2024-09-01 00:00:00', '2024-12-31 23:59:59',
    1, 1,
    4, 48, 4,
-   '102', '李老师',
+   '102', '李老师', '/uploads/images/covers/屏幕截图 2025-12-02 190110.png',
    b'0', 0),
 
-  -- 课程1004：2025春，公共基础课
+  -- 课程1004：2025春，公共基础课（主角选的课程，优先分配封面）
   (1004, '数据结构与算法', '系统学习常用数据结构和算法，提升编程能力。', '2025春',
    '2025-02-20 00:00:00', '2025-06-30 23:59:59',
    0, 1,
    5, 64, 5,
-   '103', '赵老师',
+   '103', '赵老师', '/uploads/images/covers/屏幕截图 2025-12-02 190133.png',
    b'0', 0),
 
-  -- 课程1005：2024秋，活动课（主角不选，其他学生选）
+  -- 课程1005：2024秋，活动课（主角不选，其他学生选，暂时不分配封面）
   (1005, '创新创业实践', '通过项目实践培养创新思维和创业能力。', '2024秋',
    '2024-09-01 00:00:00', '2024-12-31 23:59:59',
    1, 1,
    2, 32, 4,
-   '104', '陈老师',
+   '104', '陈老师', NULL,
    b'0', 0)
 ON DUPLICATE KEY UPDATE
   course_name = VALUES(course_name),
   course_desc = VALUES(course_desc),
   teacher_ids = VALUES(teacher_ids),
-  teacher_names = VALUES(teacher_names);
+  teacher_names = VALUES(teacher_names),
+  course_pic = VALUES(course_pic);
 
 --
 -- 3. 课程目标（course_map_goal）
@@ -531,19 +533,20 @@ INSERT INTO discussions (
 INSERT INTO `user` (
   id, username, password_hash, nickname,
   dept_id, email, phone_number, job_number,
-  user_role, status, deleted, tenant_id
+  user_role, status, deleted, tenant_id, avatar_url
 ) VALUES
-  (216, 'stu216', '123456', '学生216', 101, '216001@example.com', '13900002216', 'S216', 0, 1, 0, 0),
-  (217, 'stu217', '123456', '学生217', 101, '217001@example.com', '13900002217', 'S217', 0, 1, 0, 0),
-  (218, 'stu218', '123456', '学生218', 101, '218001@example.com', '13900002218', 'S218', 0, 1, 0, 0),
-  (219, 'stu219', '123456', '学生219', 101, '219001@example.com', '13900002219', 'S219', 0, 1, 0, 0),
-  (220, 'stu220', '123456', '学生220', 101, '220001@example.com', '13900002220', 'S220', 0, 1, 0, 0)
+  (216, 'stu216', '123456', '学生216', 101, '216001@example.com', '13900002216', 'S216', 0, 1, 0, 0, ''),
+  (217, 'stu217', '123456', '学生217', 101, '217001@example.com', '13900002217', 'S217', 0, 1, 0, 0, ''),
+  (218, 'stu218', '123456', '学生218', 101, '218001@example.com', '13900002218', 'S218', 0, 1, 0, 0, ''),
+  (219, 'stu219', '123456', '学生219', 101, '219001@example.com', '13900002219', 'S219', 0, 1, 0, 0, ''),
+  (220, 'stu220', '123456', '学生220', 101, '220001@example.com', '13900002220', 'S220', 0, 1, 0, 0, '')
 ON DUPLICATE KEY UPDATE
   username     = VALUES(username),
   nickname     = VALUES(nickname),
   email        = VALUES(email),
   phone_number = VALUES(phone_number),
-  job_number   = VALUES(job_number);
+  job_number   = VALUES(job_number),
+  avatar_url   = VALUES(avatar_url);
 
 --
 -- 2. 为现有课程再增加一些小组和选课记录
