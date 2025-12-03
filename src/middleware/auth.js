@@ -21,7 +21,8 @@ module.exports = async function authMiddleware(req, res, next) {
       id: user.id,
       user_role: user.user_role,
       nickname: user.nickname,
-      username: user.username
+      username: user.username,
+      tenant_id: user.tenant_id
     };
     return next();
   } catch (err) {

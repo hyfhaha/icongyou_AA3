@@ -23,8 +23,10 @@ CREATE TABLE `user`
     `update_time`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`      tinyint(1)   NOT NULL DEFAULT 0          COMMENT '是否删除',
     `tenant_id`    bigint       NOT NULL DEFAULT 0          COMMENT '租户编号',
+    `company_id`   int          DEFAULT NULL                COMMENT '企业ID',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `idx_username` (`tenant_id` ASC, `username` ASC, `update_time` ASC) USING BTREE
+    UNIQUE INDEX `idx_username` (`tenant_id` ASC, `username` ASC, `update_time` ASC) USING BTREE,
+    INDEX `idx_user_company` (`company_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   CHARACTER SET = utf8mb4

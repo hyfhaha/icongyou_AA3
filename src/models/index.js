@@ -6,6 +6,8 @@ const CourseStudentWork = require('./courseStudentWork');
 const TaskView = require('./taskView');
 const Discussion = require('./discussion');
 const Message = require('./message');
+const Conversation = require('./conversation');
+const ReadReceipt = require('./readReceipt');
 
 module.exports = {
   sequelize,
@@ -15,5 +17,7 @@ module.exports = {
   CourseStudentWork,
   TaskView,
   Discussion,
-  Message
+  Message,
+  Conversation,
+  ReadReceipt
 };

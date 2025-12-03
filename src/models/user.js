@@ -22,6 +22,7 @@ User.init({
   create_time: DataTypes.DATE,
   update_time: DataTypes.DATE,
   deleted: DataTypes.TINYINT,
-  tenant_id: DataTypes.BIGINT
+  tenant_id: DataTypes.BIGINT,
+  company_id: DataTypes.INTEGER
 }, { sequelize, modelName: 'user', tableName: 'user', timestamps: false });
 module.exports = User;
