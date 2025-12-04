@@ -7,6 +7,7 @@
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
+    "ali-oss": "^6.23.0",
     "axios": "^1.0.0",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
