@@ -53,7 +53,7 @@ module.exports = {
       
       // 验证团队是否存在
       const [team] = await sequelize.query(
-        'SELECT id, group_name, course_id FROM course_group WHERE id = ? AND deleted = 0',
+        'SELECT id,group_code,group_name, course_id FROM course_group WHERE id = ? AND deleted = 0',
         { replacements: [teamId], type: QueryTypes.SELECT }
       );
       
@@ -171,6 +171,8 @@ module.exports = {
           id: team.id,
           groupName: team.group_name,
           courseId: team.course_id,
+          groupCode: team.group_code, 
+
           totalScore: totalScore,
           rank: teamRank,
           rankTotal: rankingRows.length

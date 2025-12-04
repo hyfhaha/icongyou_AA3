@@ -53,3 +53,4 @@ OSS_ACCESS_KEY_SECRET=your_secret  # 访问密钥 Secret
 *   如果 `.env` 中缺少配置，系统会自动降级为“本地存储模式”，功能不受影响，但文件将无法被外网直接访问（除非服务器配置了公网 IP 和静态资源映射）。
 *   如果 OSS 网络超时或密钥错误，控制台会输出错误日志 `OSS upload failed`，并回退到本地 URL。
 
+
