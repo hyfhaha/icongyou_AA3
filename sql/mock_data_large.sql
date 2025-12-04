@@ -17,7 +17,7 @@ DELETE FROM course_student_work_like    WHERE story_id BETWEEN 10001 AND 40013;
 DELETE FROM course_student_work         WHERE course_id BETWEEN 1001 AND 1005;
 
 DELETE FROM discussions WHERE course_id BETWEEN 1001 AND 1005;
-DELETE FROM messages
+DELETE FROM message
   WHERE sender_id  BETWEEN 100 AND 220
      OR receiver_id BETWEEN 100 AND 220;
 
@@ -42,30 +42,30 @@ INSERT INTO `user` (
   user_role, status, deleted, tenant_id, avatar_url
 ) VALUES
   -- 老师（dept_id 设为 10，工号 T100+）
-  (100, 'teacher_zhang', '123456', '张老师', 10, 'teacher_zhang@example.com', '13800001000', 'T100', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190544.png'),
-  (101, 'teacher_wang',  '123456', '王老师', 10, 'teacher_wang@example.com',  '13800001001', 'T101', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190602.png'),
-  (102, 'teacher_li',    '123456', '李老师', 10, 'teacher_li@example.com',    '13800001002', 'T102', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190615.png'),
-  (103, 'teacher_zhao',  '123456', '赵老师', 10, 'teacher_zhao@example.com',  '13800001003', 'T103', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190628.png'),
-  (104, 'teacher_chen',  '123456', '陈老师', 10, 'teacher_chen@example.com',  '13800001004', 'T104', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190544.png'),
+  (100, 'teacher_zhang', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '张老师', 10, 'teacher_zhang@example.com', '13800001000', 'T100', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190544.png'),
+  (101, 'teacher_wang',  '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '王老师', 10, 'teacher_wang@example.com',  '13800001001', 'T101', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190602.png'),
+  (102, 'teacher_li',    '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '李老师', 10, 'teacher_li@example.com',    '13800001002', 'T102', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190615.png'),
+  (103, 'teacher_zhao',  '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '赵老师', 10, 'teacher_zhao@example.com',  '13800001003', 'T103', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190628.png'),
+  (104, 'teacher_chen',  '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '陈老师', 10, 'teacher_chen@example.com',  '13800001004', 'T104', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190544.png'),
 
   -- 主角学生 201（dept_id 设为 101，学号 S201）- 优先分配头像
-  (201, 'hero_student', '123456', '主角学生', 101, '201001@example.com', '13900002001', 'S201', 0, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190506.png'),
+  (201, 'hero_student', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '主角学生', 101, '201001@example.com', '13900002001', 'S201', 0, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190506.png'),
 
   -- 其他学生 202-215（暂时不分配头像，保持为空）
-  (202, 'stu202', '123456', '学生202', 101, '202001@example.com', '13900002002', 'S202', 0, 1, 0, 0, ''),
-  (203, 'stu203', '123456', '学生203', 101, '203001@example.com', '13900002003', 'S203', 0, 1, 0, 0, ''),
-  (204, 'stu204', '123456', '学生204', 101, '204001@example.com', '13900002004', 'S204', 0, 1, 0, 0, ''),
-  (205, 'stu205', '123456', '学生205', 101, '205001@example.com', '13900002005', 'S205', 0, 1, 0, 0, ''),
-  (206, 'stu206', '123456', '学生206', 101, '206001@example.com', '13900002006', 'S206', 0, 1, 0, 0, ''),
-  (207, 'stu207', '123456', '学生207', 101, '207001@example.com', '13900002007', 'S207', 0, 1, 0, 0, ''),
-  (208, 'stu208', '123456', '学生208', 101, '208001@example.com', '13900002008', 'S208', 0, 1, 0, 0, ''),
-  (209, 'stu209', '123456', '学生209', 101, '209001@example.com', '13900002009', 'S209', 0, 1, 0, 0, ''),
-  (210, 'stu210', '123456', '学生210', 101, '210001@example.com', '13900002010', 'S210', 0, 1, 0, 0, ''),
-  (211, 'stu211', '123456', '学生211', 101, '211001@example.com', '13900002011', 'S211', 0, 1, 0, 0, ''),
-  (212, 'stu212', '123456', '学生212', 101, '212001@example.com', '13900002012', 'S212', 0, 1, 0, 0, ''),
-  (213, 'stu213', '123456', '学生213', 101, '213001@example.com', '13900002013', 'S213', 0, 1, 0, 0, ''),
-  (214, 'stu214', '123456', '学生214', 101, '214001@example.com', '13900002014', 'S214', 0, 1, 0, 0, ''),
-  (215, 'stu215', '123456', '学生215', 101, '215001@example.com', '13900002015', 'S215', 0, 1, 0, 0, '')
+  (202, 'stu202', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生202', 101, '202001@example.com', '13900002002', 'S202', 0, 1, 0, 0, ''),
+  (203, 'stu203', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生203', 101, '203001@example.com', '13900002003', 'S203', 0, 1, 0, 0, ''),
+  (204, 'stu204', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生204', 101, '204001@example.com', '13900002004', 'S204', 0, 1, 0, 0, ''),
+  (205, 'stu205', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生205', 101, '205001@example.com', '13900002005', 'S205', 0, 1, 0, 0, ''),
+  (206, 'stu206', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生206', 101, '206001@example.com', '13900002006', 'S206', 0, 1, 0, 0, ''),
+  (207, 'stu207', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生207', 101, '207001@example.com', '13900002007', 'S207', 0, 1, 0, 0, ''),
+  (208, 'stu208', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生208', 101, '208001@example.com', '13900002008', 'S208', 0, 1, 0, 0, ''),
+  (209, 'stu209', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生209', 101, '209001@example.com', '13900002009', 'S209', 0, 1, 0, 0, ''),
+  (210, 'stu210', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生210', 101, '210001@example.com', '13900002010', 'S210', 0, 1, 0, 0, ''),
+  (211, 'stu211', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生211', 101, '211001@example.com', '13900002011', 'S211', 0, 1, 0, 0, ''),
+  (212, 'stu212', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生212', 101, '212001@example.com', '13900002012', 'S212', 0, 1, 0, 0, ''),
+  (213, 'stu213', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生213', 101, '213001@example.com', '13900002013', 'S213', 0, 1, 0, 0, ''),
+  (214, 'stu214', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生214', 101, '214001@example.com', '13900002014', 'S214', 0, 1, 0, 0, ''),
+  (215, 'stu215', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生215', 101, '215001@example.com', '13900002015', 'S215', 0, 1, 0, 0, '')
 ON DUPLICATE KEY UPDATE
   username     = VALUES(username),
   nickname     = VALUES(nickname),
@@ -535,11 +535,11 @@ INSERT INTO `user` (
   dept_id, email, phone_number, job_number,
   user_role, status, deleted, tenant_id, avatar_url
 ) VALUES
-  (216, 'stu216', '123456', '学生216', 101, '216001@example.com', '13900002216', 'S216', 0, 1, 0, 0, ''),
-  (217, 'stu217', '123456', '学生217', 101, '217001@example.com', '13900002217', 'S217', 0, 1, 0, 0, ''),
-  (218, 'stu218', '123456', '学生218', 101, '218001@example.com', '13900002218', 'S218', 0, 1, 0, 0, ''),
-  (219, 'stu219', '123456', '学生219', 101, '219001@example.com', '13900002219', 'S219', 0, 1, 0, 0, ''),
-  (220, 'stu220', '123456', '学生220', 101, '220001@example.com', '13900002220', 'S220', 0, 1, 0, 0, '')
+  (216, 'stu216', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生216', 101, '216001@example.com', '13900002216', 'S216', 0, 1, 0, 0, ''),
+  (217, 'stu217', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生217', 101, '217001@example.com', '13900002217', 'S217', 0, 1, 0, 0, ''),
+  (218, 'stu218', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生218', 101, '218001@example.com', '13900002218', 'S218', 0, 1, 0, 0, ''),
+  (219, 'stu219', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生219', 101, '219001@example.com', '13900002219', 'S219', 0, 1, 0, 0, ''),
+  (220, 'stu220', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生220', 101, '220001@example.com', '13900002220', 'S220', 0, 1, 0, 0, '')
 ON DUPLICATE KEY UPDATE
   username     = VALUES(username),
   nickname     = VALUES(nickname),
@@ -739,24 +739,32 @@ ON DUPLICATE KEY UPDATE
   last_view_time = VALUES(last_view_time);
 
 --
--- 6. 私信消息（messages）
+-- 6. 私信消息（message）
 --    让消息中心 / 私信接口有多轮往来记录
+--    注意：conversation_id 格式为 tenant_minId_maxId
 --
-INSERT INTO messages (
-  sender_id, receiver_id, content,
-  is_read, creator, deleted, tenant_id
+INSERT INTO message (
+  conversation_id, sender_id, receiver_id, content,
+  content_type, status, timestamp_ms, tenant_id
 ) VALUES
-  (201, 100, '老师好，我在做需求调研作业时，对访谈对象选择有些疑问。', 0, 'hero_student', 0, 0),
-  (100, 201, '可以优先选择潜在真实用户，如果不方便，可以选择同学或教师模拟用户。', 0, 'teacher_zhang', 0, 0),
-  (201, 101, '老师，我在设计RESTful API的路径规范时有点拿不准。', 0, 'hero_student', 0, 0),
-  (101, 201, '路径尽量使用名词复数形式，使用小写加中划线，保持风格统一。', 0, 'teacher_wang', 0, 0),
-  (201, 102, '老师，神经网络训练过程中loss下降到一定程度就不再变化了怎么办？', 0, 'hero_student', 0, 0),
-  (102, 201, '可以尝试降低学习率、增加正则化或者使用早停策略。', 0, 'teacher_li', 0, 0),
-  (201, 103, '老师，最短路径算法我有点混淆，什么时候用Dijkstra，什么时候用Floyd？', 0, 'hero_student', 0, 0),
-  (103, 201, '图稀疏且节点较多时适合用Dijkstra，多源最短路径或节点较少时适合用Floyd。', 0, 'teacher_zhao', 0, 0)
+  -- 学生201 与 老师100 的对话（conversation_id: 0_100_201）
+  ('0_100_201', 201, 100, '老师好，我在做需求调研作业时，对访谈对象选择有些疑问。', 'text', 1, UNIX_TIMESTAMP('2024-03-05 10:00:00') * 1000, 0),
+  ('0_100_201', 100, 201, '可以优先选择潜在真实用户，如果不方便，可以选择同学或教师模拟用户。', 'text', 1, UNIX_TIMESTAMP('2024-03-05 10:30:00') * 1000, 0),
+  
+  -- 学生201 与 老师101 的对话（conversation_id: 0_101_201）
+  ('0_101_201', 201, 101, '老师，我在设计RESTful API的路径规范时有点拿不准。', 'text', 1, UNIX_TIMESTAMP('2024-10-10 09:00:00') * 1000, 0),
+  ('0_101_201', 101, 201, '路径尽量使用名词复数形式，使用小写加中划线，保持风格统一。', 'text', 1, UNIX_TIMESTAMP('2024-10-10 09:15:00') * 1000, 0),
+  
+  -- 学生201 与 老师102 的对话（conversation_id: 0_102_201）
+  ('0_102_201', 201, 102, '老师，神经网络训练过程中loss下降到一定程度就不再变化了怎么办？', 'text', 1, UNIX_TIMESTAMP('2024-11-05 14:00:00') * 1000, 0),
+  ('0_102_201', 102, 201, '可以尝试降低学习率、增加正则化或者使用早停策略。', 'text', 1, UNIX_TIMESTAMP('2024-11-05 14:20:00') * 1000, 0),
+  
+  -- 学生201 与 老师103 的对话（conversation_id: 0_103_201）
+  ('0_103_201', 201, 103, '老师，最短路径算法我有点混淆，什么时候用Dijkstra，什么时候用Floyd？', 'text', 1, UNIX_TIMESTAMP('2025-04-15 11:00:00') * 1000, 0),
+  ('0_103_201', 103, 201, '图稀疏且节点较多时适合用Dijkstra，多源最短路径或节点较少时适合用Floyd。', 'text', 1, UNIX_TIMESTAMP('2025-04-15 11:30:00') * 1000, 0)
 ON DUPLICATE KEY UPDATE
   content = VALUES(content),
-  is_read = VALUES(is_read);
+  status = VALUES(status);
 
 --
 -- 7. 讨论补充：为原有讨论增加老师回复 / 其他学生跟帖

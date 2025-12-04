@@ -54,6 +54,9 @@ const storage = multer.diskStorage({
       case 'material':
         folder = 'materials';
         break;
+      case 'homework':
+        folder = 'homeworks';
+        break;
       default:
         // Fallback for generic uploads or if 'type' is missing (e.g. legacy route)
         folder = ''; 

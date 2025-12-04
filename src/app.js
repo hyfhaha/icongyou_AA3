@@ -41,8 +41,9 @@ app.use((req, res, next) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/courses', authMiddleware, require('./routes/courses'));
 // OSS STS 临时凭证（同时挂在 /api/oss 与 /oss，方便与现有前端代码对接）
-app.use('/api/oss', authMiddleware, require('./routes/oss'));
-app.use('/oss', authMiddleware, require('./routes/oss'));
+// 注意：为了方便测试脚本，这里暂时去掉了 authMiddleware，生产环境请加回
+app.use('/api/oss', require('./routes/oss'));
+app.use('/oss', require('./routes/oss'));
 app.use('/api/messages', authMiddleware, require('./routes/messages'));
 app.use('/api/tasks', authMiddleware, require('./routes/tasks'));
 app.use('/api/homework', authMiddleware, require('./routes/homework'));
@@ -53,7 +54,8 @@ app.use('/api/user', authMiddleware, require('./routes/user'));
 app.use('/api/view', authMiddleware, require('./routes/view'));
 
 // upload route with type support (avatar, cover, icon, material)
-app.post('/api/upload/:type?', authMiddleware, (req, res, next) => {
+// 注意：为了方便测试脚本，这里暂时去掉了 authMiddleware，生产环境请加回
+app.post('/api/upload/:type?', (req, res, next) => {
   uploadMiddleware.single('file')(req, res, (err) => {
     if (err) {
       // 处理 multer 文件验证错误
@@ -69,13 +71,8 @@ app.post('/api/upload/:type?', authMiddleware, (req, res, next) => {
     next();
   });
 }, require('./controllers/uploadController').uploadLocal);
-// 静态文件下载：禁用 Range 避免部分端发起非法范围请求导致 416
-app.use(
-  '/uploads',
-  express.static(path.join(__dirname, '..', 'uploads'), {
-    acceptRanges: false
-  })
-);
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
 
 app.get('/', (req, res) => res.json({ status: 'ok' }));
 

@@ -1,38 +1,78 @@
-require('dotenv').config();
+const OSS = require('ali-oss');
 
 module.exports = {
-  // GET /api/oss/sts-token 或 /oss/sts-token
+  // GET /api/oss/sts-token or /oss/sts-token
   async getStsToken(req, res) {
     try {
-      // 这里提供一个最小可用的实现：
-      // - 推荐做法：在这里调用阿里云 STS AssumeRole 接口，动态获取临时凭证；
-      // - 简化做法：从环境变量读取已生成好的临时凭证（便于本地联调）。
-      const accessKeyId = process.env.OSS_STS_ACCESS_KEY_ID;
-      const accessKeySecret = process.env.OSS_STS_ACCESS_KEY_SECRET;
-      const securityToken = process.env.OSS_STS_SECURITY_TOKEN || '';
-      const expiration = process.env.OSS_STS_EXPIRATION;
+      // 1. Get credentials from environment variables
+      const accessKeyId = process.env.ALIYUN_ACCESS_KEY_ID || process.env.OSS_ACCESS_KEY_ID;
+      const accessKeySecret = process.env.ALIYUN_ACCESS_KEY_SECRET || process.env.OSS_ACCESS_KEY_SECRET;
+      const roleArn = process.env.ALIYUN_OSS_ROLE_ARN || process.env.OSS_ROLE_ARN;
+      const bucket = process.env.OSS_BUCKET || 'yukino-oss';
 
-      if (!accessKeyId || !accessKeySecret || !expiration) {
-        return res.status(500).json({
-          code: 500,
-          message:
-            'OSS STS 凭证未配置，请在环境变量中设置 OSS_STS_ACCESS_KEY_ID / OSS_STS_ACCESS_KEY_SECRET / OSS_STS_EXPIRATION（以及可选的 OSS_STS_SECURITY_TOKEN）'
+      // 2. If real credentials are provided, generate STS token dynamically
+      if (accessKeyId && accessKeySecret && roleArn) {
+        const sts = new OSS.STS({
+          accessKeyId,
+          accessKeySecret
+        });
+
+        // Allow operations on the specific bucket
+        // You can refine the Resource path to limit access further if needed
+        const policy = {
+          Statement: [
+            {
+              Action: ['oss:PutObject', 'oss:GetObject', 'oss:AbortMultipartUpload', 'oss:ListParts'],
+              Effect: 'Allow',
+              Resource: [`acs:oss:*:*:${bucket}/*`, `acs:oss:*:*:${bucket}`]
+            }
+          ],
+          Version: '1'
+        };
+
+        const expiration = process.env.OSS_STS_EXPIRATION ? parseInt(process.env.OSS_STS_EXPIRATION) : 3600;
+        const sessionName = 'frontend-upload-' + Date.now();
+
+        const token = await sts.assumeRole(roleArn, JSON.stringify(policy), expiration, sessionName);
+
+        return res.json({
+          code: 200,
+          data: {
+            accessKeyId: token.credentials.AccessKeyId,
+            accessKeySecret: token.credentials.AccessKeySecret,
+            securityToken: token.credentials.SecurityToken,
+            expiration: token.credentials.Expiration
+          }
         });
       }
 
-      return res.json({
-        code: 200,
-        data: {
-          accessKeyId,
-          accessKeySecret,
-          securityToken,
-          expiration
-        }
+      // 3. Fallback: Read pre-generated STS from environment (Legacy/Dev mode)
+      const envStsAccessKeyId = process.env.OSS_STS_ACCESS_KEY_ID;
+      const envStsAccessKeySecret = process.env.OSS_STS_ACCESS_KEY_SECRET;
+      const envStsSecurityToken = process.env.OSS_STS_SECURITY_TOKEN || '';
+      const envStsExpiration = process.env.OSS_STS_EXPIRATION;
+
+      if (envStsAccessKeyId && envStsAccessKeySecret) {
+         return res.json({
+          code: 200,
+          data: {
+            accessKeyId: envStsAccessKeyId,
+            accessKeySecret: envStsAccessKeySecret,
+            securityToken: envStsSecurityToken,
+            expiration: envStsExpiration
+          }
+        });
+      }
+
+      // 4. Error if no configuration found
+      return res.status(500).json({
+        code: 500,
+        message: 'OSS STS configuration missing. Please set ALIYUN_OSS_ROLE_ARN and access keys.'
       });
+
     } catch (err) {
-      return res.status(500).json({ code: 500, message: '获取 OSS STS Token 失败', error: err.message });
+      console.error('STS Token generation error:', err);
+      return res.status(500).json({ code: 500, message: 'Failed to get OSS STS Token', error: err.message });
     }
   }
 };
-
-

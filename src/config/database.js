@@ -8,10 +8,10 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST || 'bj-cynosdbmysql-grp-7d90jsc8.sql.tencentcdb.com',
     port: process.env.DB_PORT || 23992,
-    dialect: 'mysql',
+  dialect: 'mysql',
     timezone: '+08:00',
-    logging: false,
-    dialectOptions: {
+  logging: false,
+  dialectOptions: {
       dateStrings: true,
       typeCast: true,
       allowPublicKeyRetrieval: true
@@ -21,7 +21,7 @@ const sequelize = new Sequelize(
       min: 0,
       acquire: 30000,
       idle: 10000
-    }
+  }
   }
 );
 

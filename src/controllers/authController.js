@@ -18,8 +18,8 @@ module.exports = {
       const user = await User.findOne({ where: { username } });
       if (!user) return invalidCredentials(res);
 
-            // const valid = await bcrypt.compare(password, user.password_hash || '');
-      const valid = (password === user.password_hash);
+      const valid = await bcrypt.compare(password, user.password_hash || '');
+      // const valid = (password === user.password_hash);
 
       if (!valid) return invalidCredentials(res);
 
