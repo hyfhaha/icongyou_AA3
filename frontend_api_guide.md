@@ -56,8 +56,8 @@ console.log('文件已上传到阿里云，地址是:', fileUrl);
 *   **接口地址**: `PUT /api/user/me`
 *   **Content-Type**: `application/json`
 *   **Body**:
-    ```json
-    {
+```json
+{
       "avatar_url": "https://your-bucket.oss-cn-beijing.aliyuncs.com/..."
     }
     ```
@@ -82,8 +82,8 @@ alert('头像修改成功！');
 *   **接口地址**: `POST /api/tasks/:storyId/submit`
 *   **Content-Type**: `application/json`
 *   **Body**:
-    ```json
-    {
+```json
+{
       "content": "这是我的作业描述...",
       "file_url": "https://your-bucket.oss-cn-beijing.aliyuncs.com/..."
     }

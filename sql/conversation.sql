@@ -1,4 +1,4 @@
-CREATE TABLE `conversation` (
+enenjCREATE TABLE `conversation` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `conversation_id` varchar(128) NOT NULL COMMENT '会话ID，tenant_userA_userB',
   `user_a` bigint NOT NULL COMMENT '用户A（较小ID）',

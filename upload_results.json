@@ -1,0 +1,149 @@
+{
+  "timestamp": "2025-12-05T05:00:22.615Z",
+  "total": 23,
+  "success": 23,
+  "failed": 0,
+  "files": {
+    "success": [
+      {
+        "localPath": "homeworks\\15c3bfcb518ad9a3c8379a6ffdb5c031.txt",
+        "objectName": "homeworks/15c3bfcb518ad9a3c8379a6ffdb5c031.txt",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/15c3bfcb518ad9a3c8379a6ffdb5c031.txt",
+        "size": 35
+      },
+      {
+        "localPath": "homeworks\\257b6416f068a311b672d0397995cd8a.txt",
+        "objectName": "homeworks/257b6416f068a311b672d0397995cd8a.txt",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/257b6416f068a311b672d0397995cd8a.txt",
+        "size": 35
+      },
+      {
+        "localPath": "homeworks\\43b80945250e246dc74d8e8f2b14bb79.txt",
+        "objectName": "homeworks/43b80945250e246dc74d8e8f2b14bb79.txt",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/43b80945250e246dc74d8e8f2b14bb79.txt",
+        "size": 35
+      },
+      {
+        "localPath": "homeworks\\59db0ca5118dc571981fa784e64a1ece.txt",
+        "objectName": "homeworks/59db0ca5118dc571981fa784e64a1ece.txt",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/59db0ca5118dc571981fa784e64a1ece.txt",
+        "size": 35
+      },
+      {
+        "localPath": "homeworks\\647942628622f712c97313e7f274cb87.txt",
+        "objectName": "homeworks/647942628622f712c97313e7f274cb87.txt",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/647942628622f712c97313e7f274cb87.txt",
+        "size": 35
+      },
+      {
+        "localPath": "homeworks\\eca885878bb594f5c3c30fd527a778be.txt",
+        "objectName": "homeworks/eca885878bb594f5c3c30fd527a778be.txt",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/eca885878bb594f5c3c30fd527a778be.txt",
+        "size": 35
+      },
+      {
+        "localPath": "images\\avatars\\c31c9ad464974e2f639fea24cbe2fc1e.txt",
+        "objectName": "images/avatars/c31c9ad464974e2f639fea24cbe2fc1e.txt",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/c31c9ad464974e2f639fea24cbe2fc1e.txt",
+        "size": 33
+      },
+      {
+        "localPath": "images\\avatars\\屏幕截图 2025-12-02 190506.png",
+        "objectName": "images/avatars/屏幕截图 2025-12-02 190506.png",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190506.png",
+        "size": 163315
+      },
+      {
+        "localPath": "images\\avatars\\屏幕截图 2025-12-02 190544.png",
+        "objectName": "images/avatars/屏幕截图 2025-12-02 190544.png",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190544.png",
+        "size": 214797
+      },
+      {
+        "localPath": "images\\avatars\\屏幕截图 2025-12-02 190602.png",
+        "objectName": "images/avatars/屏幕截图 2025-12-02 190602.png",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190602.png",
+        "size": 49099
+      },
+      {
+        "localPath": "images\\avatars\\屏幕截图 2025-12-02 190615.png",
+        "objectName": "images/avatars/屏幕截图 2025-12-02 190615.png",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190615.png",
+        "size": 41303
+      },
+      {
+        "localPath": "images\\avatars\\屏幕截图 2025-12-02 190628.png",
+        "objectName": "images/avatars/屏幕截图 2025-12-02 190628.png",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190628.png",
+        "size": 39612
+      },
+      {
+        "localPath": "images\\covers\\屏幕截图 2025-12-02 190040.png",
+        "objectName": "images/covers/屏幕截图 2025-12-02 190040.png",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190040.png",
+        "size": 105017
+      },
+      {
+        "localPath": "images\\covers\\屏幕截图 2025-12-02 190057.png",
+        "objectName": "images/covers/屏幕截图 2025-12-02 190057.png",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190057.png",
+        "size": 120062
+      },
+      {
+        "localPath": "images\\covers\\屏幕截图 2025-12-02 190110.png",
+        "objectName": "images/covers/屏幕截图 2025-12-02 190110.png",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190110.png",
+        "size": 83885
+      },
+      {
+        "localPath": "images\\covers\\屏幕截图 2025-12-02 190133.png",
+        "objectName": "images/covers/屏幕截图 2025-12-02 190133.png",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190133.png",
+        "size": 90143
+      },
+      {
+        "localPath": "materials\\README_测试文件说明.md",
+        "objectName": "materials/README_测试文件说明.md",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/materials/README_%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E.md",
+        "size": 1732
+      },
+      {
+        "localPath": "materials\\test_material_1.pdf",
+        "objectName": "materials/test_material_1.pdf",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_1.pdf",
+        "size": 0
+      },
+      {
+        "localPath": "materials\\test_material_2.pdf",
+        "objectName": "materials/test_material_2.pdf",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_2.pdf",
+        "size": 0
+      },
+      {
+        "localPath": "materials\\test_material_3.doc",
+        "objectName": "materials/test_material_3.doc",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_3.doc",
+        "size": 22
+      },
+      {
+        "localPath": "materials\\test_material_4.docx",
+        "objectName": "materials/test_material_4.docx",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_4.docx",
+        "size": 12
+      },
+      {
+        "localPath": "materials\\实践报告.docx",
+        "objectName": "materials/实践报告.docx",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/materials/%E5%AE%9E%E8%B7%B5%E6%8A%A5%E5%91%8A.docx",
+        "size": 77539
+      },
+      {
+        "localPath": "materials\\测试文件生成指南.md",
+        "objectName": "materials/测试文件生成指南.md",
+        "url": "https://icy1883.oss-cn-beijing.aliyuncs.com/materials/%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E6%8C%87%E5%8D%97.md",
+        "size": 3301
+      }
+    ],
+    "failed": []
+  }
+}

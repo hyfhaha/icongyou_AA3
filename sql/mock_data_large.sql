@@ -20,6 +20,12 @@ DELETE FROM discussions WHERE course_id BETWEEN 1001 AND 1005;
 DELETE FROM message
   WHERE sender_id  BETWEEN 100 AND 220
      OR receiver_id BETWEEN 100 AND 220;
+-- 新 IM 逻辑相关：清理会话与已读回执
+DELETE FROM read_receipt
+  WHERE user_id BETWEEN 100 AND 220;
+DELETE FROM conversation
+  WHERE tenant_id = 0
+    AND (user_a BETWEEN 100 AND 220 OR user_b BETWEEN 100 AND 220);
 
 DELETE FROM course_student WHERE course_id BETWEEN 1001 AND 1005;
 DELETE FROM course_group   WHERE course_id BETWEEN 1001 AND 1005;
@@ -42,14 +48,14 @@ INSERT INTO `user` (
   user_role, status, deleted, tenant_id, avatar_url
 ) VALUES
   -- 老师（dept_id 设为 10，工号 T100+）
-  (100, 'teacher_zhang', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '张老师', 10, 'teacher_zhang@example.com', '13800001000', 'T100', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190544.png'),
-  (101, 'teacher_wang',  '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '王老师', 10, 'teacher_wang@example.com',  '13800001001', 'T101', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190602.png'),
-  (102, 'teacher_li',    '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '李老师', 10, 'teacher_li@example.com',    '13800001002', 'T102', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190615.png'),
-  (103, 'teacher_zhao',  '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '赵老师', 10, 'teacher_zhao@example.com',  '13800001003', 'T103', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190628.png'),
-  (104, 'teacher_chen',  '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '陈老师', 10, 'teacher_chen@example.com',  '13800001004', 'T104', 1, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190544.png'),
+  (100, 'teacher_zhang', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '张老师', 10, 'teacher_zhang@example.com', '13800001000', 'T100', 1, 1, 0, 0, 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190544.png'),
+  (101, 'teacher_wang',  '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '王老师', 10, 'teacher_wang@example.com',  '13800001001', 'T101', 1, 1, 0, 0, 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190602.png'),
+  (102, 'teacher_li',    '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '李老师', 10, 'teacher_li@example.com',    '13800001002', 'T102', 1, 1, 0, 0, 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190615.png'),
+  (103, 'teacher_zhao',  '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '赵老师', 10, 'teacher_zhao@example.com',  '13800001003', 'T103', 1, 1, 0, 0, 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190628.png'),
+  (104, 'teacher_chen',  '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '陈老师', 10, 'teacher_chen@example.com',  '13800001004', 'T104', 1, 1, 0, 0, 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190544.png'),
 
   -- 主角学生 201（dept_id 设为 101，学号 S201）- 优先分配头像
-  (201, 'hero_student', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '主角学生', 101, '201001@example.com', '13900002001', 'S201', 0, 1, 0, 0, '/uploads/images/avatars/屏幕截图 2025-12-02 190506.png'),
+  (201, 'hero_student', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '主角学生', 101, '201001@example.com', '13900002001', 'S201', 0, 1, 0, 0, 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190506.png'),
 
   -- 其他学生 202-215（暂时不分配头像，保持为空）
   (202, 'stu202', '$2b$10$XZfQHrwpULfYl5x6JrlIYeIvXAdnPURlijJlhkjz8Q2Sv/5Y0X/Ti', '学生202', 101, '202001@example.com', '13900002002', 'S202', 0, 1, 0, 0, ''),
@@ -76,7 +82,6 @@ ON DUPLICATE KEY UPDATE
   avatar_url   = VALUES(avatar_url);
 
 --
--- 2. 课程：5门课程，不同学期、不同类别
 --    主角学生201会选课程1001-1004（4门）
 --
 INSERT INTO course (
@@ -84,6 +89,7 @@ INSERT INTO course (
   start_time, end_time, lesson_status, show_score,
   course_type, course_hour, standard_team_num,
   teacher_ids, teacher_names, course_pic,
+  student_allow_team, student_allow_join,
   deleted, tenant_id
 ) VALUES
   -- 课程1001：2024春，必修课（主角选的课程，优先分配封面）
@@ -91,7 +97,8 @@ INSERT INTO course (
    '2024-02-20 00:00:00', '2024-06-30 23:59:59',
    99, 1,
    3, 64, 5,
-   '100', '张老师', '/uploads/images/covers/屏幕截图 2025-12-02 190040.png',
+   '100', '张老师', 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190040.png',
+   b'1', b'1',
    b'0', 0),
 
   -- 课程1002：2024秋，实训课（主角选的课程，优先分配封面）
@@ -99,7 +106,8 @@ INSERT INTO course (
    '2024-09-01 00:00:00', '2024-12-31 23:59:59',
    1, 1,
    1, 80, 6,
-   '101', '王老师', '/uploads/images/covers/屏幕截图 2025-12-02 190057.png',
+   '101', '王老师', 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190057.png',
+   b'1', b'1',
    b'0', 0),
 
   -- 课程1003：2024秋，选修课（主角选的课程，优先分配封面）
@@ -107,7 +115,8 @@ INSERT INTO course (
    '2024-09-01 00:00:00', '2024-12-31 23:59:59',
    1, 1,
    4, 48, 4,
-   '102', '李老师', '/uploads/images/covers/屏幕截图 2025-12-02 190110.png',
+   '102', '李老师', 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190110.png',
+   b'1', b'1',
    b'0', 0),
 
   -- 课程1004：2025春，公共基础课（主角选的课程，优先分配封面）
@@ -115,7 +124,8 @@ INSERT INTO course (
    '2025-02-20 00:00:00', '2025-06-30 23:59:59',
    0, 1,
    5, 64, 5,
-   '103', '赵老师', '/uploads/images/covers/屏幕截图 2025-12-02 190133.png',
+   '103', '赵老师', 'https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190133.png',
+   b'1', b'1',
    b'0', 0),
 
   -- 课程1005：2024秋，活动课（主角不选，其他学生选，暂时不分配封面）
@@ -124,6 +134,7 @@ INSERT INTO course (
    1, 1,
    2, 32, 4,
    '104', '陈老师', NULL,
+   b'1', b'1',
    b'0', 0)
 ON DUPLICATE KEY UPDATE
   course_name = VALUES(course_name),
@@ -383,11 +394,11 @@ INSERT IGNORE INTO course_group (
   id, course_id, group_name, max_size, current_size,
   group_code, deleted, tenant_id
 ) VALUES
-  (1001, 1001, '软工-第1组', 5, 5, 'SE-G1', b'0', 0),
-  (1002, 1002, '全栈-第1组', 6, 6, 'WEB-G1', b'0', 0),
-  (1003, 1003, 'AI-第1组', 4, 4, 'AI-G1', b'0', 0),
-  (1004, 1004, '算法-第1组', 5, 5, 'DS-G1', b'0', 0),
-  (1005, 1005, '创新-第1组', 4, 4, 'INN-G1', b'0', 0);
+  (1001, 1001, '软工-第1组', 5, 5, 'SE2G3A', b'0', 0),
+  (1002, 1002, '全栈-第1组', 6, 6, 'WB3F4K', b'0', 0),
+  (1003, 1003, 'AI-第1组', 4, 4, 'AI4H7P', b'0', 0),
+  (1004, 1004, '算法-第1组', 5, 5, 'DS5J8R', b'0', 0),
+  (1005, 1005, '创新-第1组', 4, 4, 'IN6L9T', b'0', 0);
 
 --
 -- 8. 选课学生（course_student）
@@ -448,25 +459,45 @@ INSERT INTO course_student_work (
   creator, deleted, tenant_id
 ) VALUES
   -- 课程1001：主角201的作业（部分示例，实际应该有更多）
-  (100001, 1001, 10001, 201, 201, '主角学生', NULL, 0, NULL, '选题报告_主角.docx', 'https://example.com/files/1001/10001/stu201.docx', 9.5, NULL, b'1', 5, 5, 2, 'teacher_zhang', b'0', 0),
-  (100002, 1001, 10002, 201, 201, '主角学生', 1001, 1, 40.0, '需求调研_软工G1_队长.docx', 'https://example.com/files/1001/10002/g1_leader.docx', 19.0, 19.0, b'1', 5, 6, 3, 'teacher_zhang', b'0', 0),
-  (100003, 1001, 10002, 202, 201, '主角学生', 1001, 1, 20.0, '需求调研_软工G1_202.docx', 'https://example.com/files/1001/10002/g1_202.docx', 19.0, 19.0, b'1', 4, 2, 1, 'teacher_zhang', b'0', 0),
-  (100004, 1001, 10003, 201, 201, '主角学生', NULL, 0, NULL, '用例图_主角.docx', 'https://example.com/files/1001/10003/stu201.docx', 14.5, NULL, b'1', 4, 3, 1, 'teacher_zhang', b'0', 0),
-  (100005, 1001, 10005, 201, 201, '主角学生', 1001, 1, 50.0, '架构设计_软工G1_队长.docx', 'https://example.com/files/1001/10005/g1_leader.docx', 28.5, 28.5, b'1', 5, 7, 4, 'teacher_zhang', b'0', 0),
+  (100001, 1001, 10001, 201, 201, '主角学生', NULL, 0, NULL, '选题报告_主角.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/15c3bfcb518ad9a3c8379a6ffdb5c031.txt', 9.5, NULL, b'1', 5, 5, 2, 'teacher_zhang', b'0', 0),
+  (100002, 1001, 10002, 201, 201, '主角学生', 1001, 1, 40.0, '需求调研_软工G1_队长.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/257b6416f068a311b672d0397995cd8a.txt', 19.0, 19.0, b'1', 5, 6, 3, 'teacher_zhang', b'0', 0),
+  (100003, 1001, 10002, 202, 201, '主角学生', 1001, 1, 20.0, '需求调研_软工G1_202.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/43b80945250e246dc74d8e8f2b14bb79.txt', 19.0, 19.0, b'1', 4, 2, 1, 'teacher_zhang', b'0', 0),
+  (100004, 1001, 10003, 201, 201, '主角学生', NULL, 0, NULL, '用例图_主角.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/59db0ca5118dc571981fa784e64a1ece.txt', 14.5, NULL, b'1', 4, 3, 1, 'teacher_zhang', b'0', 0),
+  (100005, 1001, 10005, 201, 201, '主角学生', 1001, 1, 50.0, '架构设计_软工G1_队长.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/647942628622f712c97313e7f274cb87.txt', 28.5, 28.5, b'1', 5, 7, 4, 'teacher_zhang', b'0', 0),
 
   -- 课程1002：主角201的作业
-  (200001, 1002, 20001, 201, 201, '主角学生', NULL, 0, NULL, 'HTML练习_主角.html', 'https://example.com/files/1002/20001/stu201.html', 9.0, NULL, b'1', 4, 4, 2, 'teacher_wang', b'0', 0),
-  (200002, 1002, 20003, 201, 201, '主角学生', 1002, 1, 35.0, 'React组件_全栈G1_主角.docx', 'https://example.com/files/1002/20003/g1_201.docx', 24.0, 24.0, b'1', 5, 5, 3, 'teacher_wang', b'0', 0),
-  (200003, 1002, 20005, 201, 201, '主角学生', 1002, 1, 45.0, 'API设计_全栈G1_队长.docx', 'https://example.com/files/1002/20005/g1_leader.docx', 28.0, 28.0, b'1', 5, 6, 3, 'teacher_wang', b'0', 0),
+  (200001, 1002, 20001, 201, 201, '主角学生', NULL, 0, NULL, 'HTML练习_主角.html', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/eca885878bb594f5c3c30fd527a778be.txt', 9.0, NULL, b'1', 4, 4, 2, 'teacher_wang', b'0', 0),
+  (200002, 1002, 20003, 201, 201, '主角学生', 1002, 1, 35.0, 'React组件_全栈G1_主角.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/15c3bfcb518ad9a3c8379a6ffdb5c031.txt', 24.0, 24.0, b'1', 5, 5, 3, 'teacher_wang', b'0', 0),
+  (200003, 1002, 20005, 201, 201, '主角学生', 1002, 1, 45.0, 'API设计_全栈G1_队长.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/257b6416f068a311b672d0397995cd8a.txt', 28.0, 28.0, b'1', 5, 6, 3, 'teacher_wang', b'0', 0),
 
   -- 课程1003：主角201的作业
-  (300001, 1003, 30001, 201, 201, '主角学生', NULL, 0, NULL, 'ML理论_主角.docx', 'https://example.com/files/1003/30001/stu201.docx', 14.5, NULL, b'1', 5, 4, 2, 'teacher_li', b'0', 0),
-  (300002, 1003, 30006, 201, 201, '主角学生', 1003, 1, 50.0, '神经网络_AI-G1_队长.docx', 'https://example.com/files/1003/30006/g1_leader.docx', 33.0, 33.0, b'1', 5, 5, 3, 'teacher_li', b'0', 0),
+  (300001, 1003, 30001, 201, 201, '主角学生', NULL, 0, NULL, 'ML理论_主角.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/43b80945250e246dc74d8e8f2b14bb79.txt', 14.5, NULL, b'1', 5, 4, 2, 'teacher_li', b'0', 0),
+  (300002, 1003, 30006, 201, 201, '主角学生', 1003, 1, 50.0, '神经网络_AI-G1_队长.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/59db0ca5118dc571981fa784e64a1ece.txt', 33.0, 33.0, b'1', 5, 5, 3, 'teacher_li', b'0', 0),
 
   -- 课程1004：主角201的作业
-  (400001, 1004, 40001, 201, 201, '主角学生', NULL, 0, NULL, '顺序表_主角.cpp', 'https://example.com/files/1004/40001/stu201.cpp', 14.5, NULL, b'1', 4, 3, 1, 'teacher_zhao', b'0', 0),
-  (400002, 1004, 40005, 201, 201, '主角学生', 1004, 1, 40.0, '二叉树遍历_算法G1_主角.cpp', 'https://example.com/files/1004/40005/g1_201.cpp', 24.0, 24.0, b'1', 5, 4, 2, 'teacher_zhao', b'0', 0),
-  (400003, 1004, 40007, 201, 201, '主角学生', 1004, 1, 45.0, '图操作_算法G1_队长.cpp', 'https://example.com/files/1004/40007/g1_leader.cpp', 28.5, 28.5, b'1', 5, 5, 3, 'teacher_zhao', b'0', 0);
+  (400001, 1004, 40001, 201, 201, '主角学生', NULL, 0, NULL, '顺序表_主角.cpp', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/647942628622f712c97313e7f274cb87.txt', 14.5, NULL, b'1', 4, 3, 1, 'teacher_zhao', b'0', 0),
+  (400002, 1004, 40005, 201, 201, '主角学生', 1004, 1, 40.0, '二叉树遍历_算法G1_主角.cpp', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/eca885878bb594f5c3c30fd527a778be.txt', 24.0, 24.0, b'1', 5, 4, 2, 'teacher_zhao', b'0', 0),
+  (400003, 1004, 40007, 201, 201, '主角学生', 1004, 1, 45.0, '图操作_算法G1_队长.cpp', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/15c3bfcb518ad9a3c8379a6ffdb5c031.txt', 28.5, 28.5, b'1', 5, 5, 3, 'teacher_zhao', b'0', 0)
+ON DUPLICATE KEY UPDATE
+  course_id       = VALUES(course_id),
+  story_id        = VALUES(story_id),
+  student_id      = VALUES(student_id),
+  submit_id       = VALUES(submit_id),
+  submit_name     = VALUES(submit_name),
+  group_id        = VALUES(group_id),
+  teamwork        = VALUES(teamwork),
+  contribution    = VALUES(contribution),
+  file_name       = VALUES(file_name),
+  file_url        = VALUES(file_url),
+  score           = VALUES(score),
+  team_score      = VALUES(team_score),
+  recommend       = VALUES(recommend),
+  recommend_rank  = VALUES(recommend_rank),
+  like_count      = VALUES(like_count),
+  favorite_count  = VALUES(favorite_count),
+  creator         = VALUES(creator),
+  deleted         = VALUES(deleted),
+  tenant_id       = VALUES(tenant_id);
 
 --
 -- 10. 优秀作业点赞和收藏
@@ -506,11 +537,11 @@ INSERT IGNORE INTO course_map_story_material (
   material_name, material_type, file_name, content,
   remark, deleted, tenant_id
 ) VALUES
-  (10001, 1001, 10002, '需求调研模板', 5, 'requirement_template.docx', 'https://example.com/files/materials/req_template.docx', '需求调研报告模板', b'0', 0),
-  (10002, 1001, 10005, '架构设计规范', 1, NULL, 'https://example.com/docs/arch_guide', '系统架构设计规范文档', b'0', 0),
-  (20001, 1002, 20005, 'RESTful API设计指南', 1, NULL, 'https://example.com/docs/api_guide', 'API设计最佳实践', b'0', 0),
-  (30001, 1003, 30006, '神经网络实现示例', 5, 'nn_example.py', 'https://example.com/files/materials/nn_example.py', '神经网络实现参考代码', b'0', 0),
-  (40001, 1004, 40007, '图算法实验指导', 5, 'graph_lab_guide.pdf', 'https://example.com/files/materials/graph_guide.pdf', '图算法实验指导书', b'0', 0);
+  (10001, 1001, 10002, '需求调研模板', 5, 'requirement_template.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_4.docx', '需求调研报告模板', b'0', 0),
+  (10002, 1001, 10005, '架构设计规范', 1, NULL, 'https://icy1883.oss-cn-beijing.aliyuncs.com/materials/%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E6%8C%87%E5%8D%97.md', '系统架构设计规范文档', b'0', 0),
+  (20001, 1002, 20005, 'RESTful API设计指南', 1, NULL, 'https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_1.pdf', 'API设计最佳实践', b'0', 0),
+  (30001, 1003, 30006, '神经网络实现示例', 5, 'nn_example.py', 'https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_2.pdf', '神经网络实现参考代码', b'0', 0),
+  (40001, 1004, 40007, '图算法实验指导', 5, 'graph_lab_guide.pdf', 'https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_3.doc', '图算法实验指导书', b'0', 0);
 
 --
 -- 12. 讨论（为主角学生201创建一些讨论）
@@ -557,10 +588,10 @@ INSERT IGNORE INTO course_group (
   group_code, deleted, tenant_id
 ) VALUES
   (1101, 1001, '软工-第2组', 5, 5, 'SE-G2', b'0', 0),
-  (1105, 1001, '软工-第3组', 5, 5, 'SE-G3', b'0', 0),
-  (1102, 1002, '全栈-第2组', 6, 5, 'WEB-G2', b'0', 0),
-  (1103, 1003, 'AI-第2组',   4, 3, 'AI-G2',  b'0', 0),
-  (1104, 1004, '算法-第2组', 5, 4, 'DS-G2',  b'0', 0);
+  (1105, 1001, '软工-第3组', 5, 5, 'SE7M2X', b'0', 0),
+  (1102, 1002, '全栈-第2组', 6, 5, 'WB8N3Y', b'0', 0),
+  (1103, 1003, 'AI-第2组',   4, 3, 'AI9P4Z', b'0', 0),
+  (1104, 1004, '算法-第2组', 5, 4, 'DS6Q5V', b'0', 0);
 
 INSERT IGNORE INTO course_student (
   id, course_id, student_id, group_id, leader,
@@ -615,80 +646,100 @@ INSERT INTO course_student_work (
   -- ====== 课程1001：为若干任务增加更多学生作业 ======
   -- 任务10001（个人）：再加3个学生
   (100010, 1001, 10001, 202, 202, '学生202', NULL, 0, NULL,
-   '选题报告_学生202.docx', 'https://example.com/files/1001/10001/stu202.docx',
+   '选题报告_学生202.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/257b6416f068a311b672d0397995cd8a.txt',
    9.0, NULL, b'0', NULL, 1, 0, 'teacher_zhang', b'0', 0),
   (100011, 1001, 10001, 203, 203, '学生203', NULL, 0, NULL,
-   '选题报告_学生203.docx', 'https://example.com/files/1001/10001/stu203.docx',
+   '选题报告_学生203.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/43b80945250e246dc74d8e8f2b14bb79.txt',
    8.8, NULL, b'0', NULL, 0, 0, 'teacher_zhang', b'0', 0),
   (100012, 1001, 10001, 204, 204, '学生204', NULL, 0, NULL,
-   '选题报告_学生204.docx', 'https://example.com/files/1001/10001/stu204.docx',
+   '选题报告_学生204.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/59db0ca5118dc571981fa784e64a1ece.txt',
    9.2, NULL, b'1', 4, 2, 1, 'teacher_zhang', b'0', 0),
 
   -- 任务10003（个人）：多几个作业
   (100013, 1001, 10003, 202, 202, '学生202', NULL, 0, NULL,
-   '用例图_学生202.docx', 'https://example.com/files/1001/10003/stu202.docx',
+   '用例图_学生202.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/647942628622f712c97313e7f274cb87.txt',
    8.9, NULL, b'0', NULL, 0, 0, 'teacher_zhang', b'0', 0),
   (100014, 1001, 10003, 203, 203, '学生203', NULL, 0, NULL,
-   '用例图_学生203.docx', 'https://example.com/files/1001/10003/stu203.docx',
+   '用例图_学生203.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/eca885878bb594f5c3c30fd527a778be.txt',
    9.1, NULL, b'1', 5, 3, 1, 'teacher_zhang', b'0', 0),
 
   -- 任务10007（团队-全员）：为第1组所有成员补齐记录
   (100015, 1001, 10007, 201, 201, '主角学生', 1001, 1, 35.0,
-   '核心模块_G1_201.docx', 'https://example.com/files/1001/10007/g1_201.docx',
+   '核心模块_G1_201.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/15c3bfcb518ad9a3c8379a6ffdb5c031.txt',
    27.0, 27.0, b'1', 5, 4, 2, 'teacher_zhang', b'0', 0),
   (100016, 1001, 10007, 202, 201, '主角学生', 1001, 1, 25.0,
-   '核心模块_G1_202.docx', 'https://example.com/files/1001/10007/g1_202.docx',
+   '核心模块_G1_202.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/257b6416f068a311b672d0397995cd8a.txt',
    27.0, 27.0, b'0', NULL, 1, 0, 'teacher_zhang', b'0', 0),
   (100017, 1001, 10007, 203, 201, '主角学生', 1001, 1, 20.0,
-   '核心模块_G1_203.docx', 'https://example.com/files/1001/10007/g1_203.docx',
+   '核心模块_G1_203.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/43b80945250e246dc74d8e8f2b14bb79.txt',
    27.0, 27.0, b'0', NULL, 0, 0, 'teacher_zhang', b'0', 0),
   (100018, 1001, 10007, 204, 201, '主角学生', 1001, 1, 10.0,
-   '核心模块_G1_204.docx', 'https://example.com/files/1001/10007/g1_204.docx',
+   '核心模块_G1_204.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/59db0ca5118dc571981fa784e64a1ece.txt',
    27.0, 27.0, b'0', NULL, 0, 0, 'teacher_zhang', b'0', 0),
   (100019, 1001, 10007, 205, 201, '主角学生', 1001, 1, 10.0,
-   '核心模块_G1_205.docx', 'https://example.com/files/1001/10007/g1_205.docx',
+   '核心模块_G1_205.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/647942628622f712c97313e7f274cb87.txt',
    27.0, 27.0, b'0', NULL, 0, 0, 'teacher_zhang', b'0', 0),
 
   -- ====== 课程1002：为任务20001/20003/20005/20009 加更多作业 ======
   (200010, 1002, 20001, 202, 202, '学生202', NULL, 0, NULL,
-   'HTML练习_学生202.html', 'https://example.com/files/1002/20001/stu202.html',
+   'HTML练习_学生202.html', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/eca885878bb594f5c3c30fd527a778be.txt',
    8.5, NULL, b'0', NULL, 0, 0, 'teacher_wang', b'0', 0),
   (200011, 1002, 20001, 203, 203, '学生203', NULL, 0, NULL,
-   'HTML练习_学生203.html', 'https://example.com/files/1002/20001/stu203.html',
+   'HTML练习_学生203.html', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/15c3bfcb518ad9a3c8379a6ffdb5c031.txt',
    9.2, NULL, b'1', 4, 2, 1, 'teacher_wang', b'0', 0),
 
   (200012, 1002, 20003, 202, 201, '主角学生', 1002, 1, 25.0,
-   'React组件_WEB-G1_202.docx', 'https://example.com/files/1002/20003/g1_202.docx',
+   'React组件_WEB-G1_202.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/257b6416f068a311b672d0397995cd8a.txt',
    24.0, 24.0, b'0', NULL, 0, 0, 'teacher_wang', b'0', 0),
   (200013, 1002, 20003, 203, 201, '主角学生', 1002, 1, 20.0,
-   'React组件_WEB-G1_203.docx', 'https://example.com/files/1002/20003/g1_203.docx',
+   'React组件_WEB-G1_203.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/43b80945250e246dc74d8e8f2b14bb79.txt',
    24.0, 24.0, b'0', NULL, 0, 0, 'teacher_wang', b'0', 0),
 
   (200014, 1002, 20005, 202, 201, '主角学生', 1002, 1, 30.0,
-   'API设计_WEB-G1_202.docx', 'https://example.com/files/1002/20005/g1_202.docx',
+   'API设计_WEB-G1_202.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/59db0ca5118dc571981fa784e64a1ece.txt',
    28.0, 28.0, b'0', NULL, 0, 0, 'teacher_wang', b'0', 0),
 
   (200015, 1002, 20009, 201, 201, '主角学生', 1002, 1, 40.0,
-   '联调测试_WEB-G1_201.docx', 'https://example.com/files/1002/20009/g1_201.docx',
+   '联调测试_WEB-G1_201.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/647942628622f712c97313e7f274cb87.txt',
    26.0, 26.0, b'1', 5, 4, 2, 'teacher_wang', b'0', 0),
   (200016, 1002, 20009, 202, 201, '主角学生', 1002, 1, 30.0,
-   '联调测试_WEB-G1_202.docx', 'https://example.com/files/1002/20009/g1_202.docx',
+   '联调测试_WEB-G1_202.docx', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/eca885878bb594f5c3c30fd527a778be.txt',
    26.0, 26.0, b'0', NULL, 0, 0, 'teacher_wang', b'0', 0),
 
   -- ====== 课程1003/1004：再补充几条作业 ======
   (300020, 1003, 30003, 201, 201, '主角学生', 1003, 1, 40.0,
-   '分类算法_AI-G1_201.ipynb', 'https://example.com/files/1003/30003/g1_201.ipynb',
+   '分类算法_AI-G1_201.ipynb', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/15c3bfcb518ad9a3c8379a6ffdb5c031.txt',
    27.0, 27.0, b'1', 5, 3, 2, 'teacher_li', b'0', 0),
   (300021, 1003, 30003, 202, 201, '主角学生', 1003, 1, 30.0,
-   '分类算法_AI-G1_202.ipynb', 'https://example.com/files/1003/30003/g1_202.ipynb',
+   '分类算法_AI-G1_202.ipynb', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/257b6416f068a311b672d0397995cd8a.txt',
    27.0, 27.0, b'0', NULL, 0, 0, 'teacher_li', b'0', 0),
 
   (400020, 1004, 40005, 202, 201, '主角学生', 1004, 1, 30.0,
-   '二叉树遍历_算法G1_202.cpp', 'https://example.com/files/1004/40005/g1_202.cpp',
+   '二叉树遍历_算法G1_202.cpp', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/43b80945250e246dc74d8e8f2b14bb79.txt',
    23.0, 23.0, b'0', NULL, 0, 0, 'teacher_zhao', b'0', 0),
   (400021, 1004, 40005, 203, 201, '主角学生', 1004, 1, 20.0,
-   '二叉树遍历_算法G1_203.cpp', 'https://example.com/files/1004/40005/g1_203.cpp',
-   23.0, 23.0, b'0', NULL, 0, 0, 'teacher_zhao', b'0', 0);
+   '二叉树遍历_算法G1_203.cpp', 'https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/59db0ca5118dc571981fa784e64a1ece.txt',
+   23.0, 23.0, b'0', NULL, 0, 0, 'teacher_zhao', b'0', 0)
+ON DUPLICATE KEY UPDATE
+  course_id       = VALUES(course_id),
+  story_id        = VALUES(story_id),
+  student_id      = VALUES(student_id),
+  submit_id       = VALUES(submit_id),
+  submit_name     = VALUES(submit_name),
+  group_id        = VALUES(group_id),
+  teamwork        = VALUES(teamwork),
+  contribution    = VALUES(contribution),
+  file_name       = VALUES(file_name),
+  file_url        = VALUES(file_url),
+  score           = VALUES(score),
+  team_score      = VALUES(team_score),
+  recommend       = VALUES(recommend),
+  recommend_rank  = VALUES(recommend_rank),
+  like_count      = VALUES(like_count),
+  favorite_count  = VALUES(favorite_count),
+  creator         = VALUES(creator),
+  deleted         = VALUES(deleted),
+  tenant_id       = VALUES(tenant_id);
 
 --
 -- 4. 补充更多点赞和收藏，增强“热度”数据
@@ -739,10 +790,33 @@ ON DUPLICATE KEY UPDATE
   last_view_time = VALUES(last_view_time);
 
 --
--- 6. 私信消息（message）
+-- 6. 私信会话与消息（conversation + message）
 --    让消息中心 / 私信接口有多轮往来记录
---    注意：conversation_id 格式为 tenant_minId_maxId
+--    注意：
+--      1）conversation_id 格式为 tenant_minId_maxId
+--      2）根据新逻辑，需要先有 conversation 再插入 message
 --
+
+-- 6.1 先创建会话记录（conversation）
+INSERT INTO conversation (
+  conversation_id, user_a, user_b,
+  last_msg_id, last_msg_content, last_msg_time,
+  unread_a, unread_b, tenant_id, deleted
+) VALUES
+  -- 学生201 与 老师100 的会话
+  ('0_100_201', 100, 201, NULL, '', NULL, 0, 0, 0, 0),
+  -- 学生201 与 老师101 的会话
+  ('0_101_201', 101, 201, NULL, '', NULL, 0, 0, 0, 0),
+  -- 学生201 与 老师102 的会话
+  ('0_102_201', 102, 201, NULL, '', NULL, 0, 0, 0, 0),
+  -- 学生201 与 老师103 的会话
+  ('0_103_201', 103, 201, NULL, '', NULL, 0, 0, 0, 0)
+ON DUPLICATE KEY UPDATE
+  user_a = VALUES(user_a),
+  user_b = VALUES(user_b),
+  deleted = VALUES(deleted);
+
+-- 6.2 再插入消息记录（message）
 INSERT INTO message (
   conversation_id, sender_id, receiver_id, content,
   content_type, status, timestamp_ms, tenant_id
@@ -825,17 +899,16 @@ WHERE course_id BETWEEN 1001 AND 1005
   AND deleted = b'0';
 
 --
->>>>>>> a45e39a (四类资源)
--- 调整任务时间到距离当前日期附近，划分为三类：已过期 / 进行中 / 未开始
--- 说明：使用 CURDATE() 使脚本在不同时间执行都能生成“接近现在”的时间
---   已过期：开始和结束都早于今天（约 60~30 天前）
---   进行中：今天在开始和结束之间（约 前10天 ~ 后10天）
---   未开始：开始和结束都晚于今天（约 后5天 ~ 后35天）
+-- 调整任务时间到 2025-12-05 附近，划分为三类：已过期 / 进行中 / 未开始
+--   已过期：2025-10-01 ~ 2025-11-05
+--   进行中：2025-11-25 ~ 2025-12-15（中心为 12-05）
+--   未开始：2025-12-10 ~ 2026-01-10
 --
+
 -- 已过期作业
 UPDATE course_map_story
-SET start_time = DATE_SUB(CURDATE(), INTERVAL 60 DAY),
-    end_time   = DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+SET start_time = '2025-10-01 00:00:00',
+    end_time   = '2025-11-05 23:59:59'
 WHERE id IN (
   10001,10002,10003,10004,
   20001,20002,20003,20004,
@@ -845,8 +918,8 @@ WHERE id IN (
 
 -- 正在进行中的作业
 UPDATE course_map_story
-SET start_time = DATE_SUB(CURDATE(), INTERVAL 10 DAY),
-    end_time   = DATE_ADD(CURDATE(), INTERVAL 10 DAY)
+SET start_time = '2025-11-25 00:00:00',
+    end_time   = '2025-12-15 23:59:59'
 WHERE id IN (
   10005,10006,10007,10008,10009,10010,
   20005,20006,20007,20008,20009,
@@ -856,8 +929,8 @@ WHERE id IN (
 
 -- 尚未开始的作业
 UPDATE course_map_story
-SET start_time = DATE_ADD(CURDATE(), INTERVAL 5 DAY),
-    end_time   = DATE_ADD(CURDATE(), INTERVAL 35 DAY)
+SET start_time = '2025-12-10 00:00:00',
+    end_time   = '2026-01-10 23:59:59'
 WHERE id IN (
   10011,10012,10013,10014,10015,
   20010,20011,20012,

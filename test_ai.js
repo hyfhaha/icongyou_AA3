@@ -11,7 +11,7 @@ const axios = require('axios');
 
 // ==================== 配置 ====================
 const BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
-const TEST_USERNAME = 'student01';
+const TEST_USERNAME = 'hero_student';
 const TEST_PASSWORD = '123456';
 
 // 颜色输出辅助函数（用于终端显示）

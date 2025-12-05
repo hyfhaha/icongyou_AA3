@@ -36,19 +36,7 @@ module.exports = {
       const tenantId = receiver.tenant_id || 0;
       const conversationId = getConversationId(senderId, receiverId, tenantId);
 
-      // 1. Create message
-      const msg = await Message.create({
-        conversation_id: conversationId,
-        sender_id: senderId,
-        receiver_id: receiverId,
-        content: content.trim(),
-        content_type: 'text',
-        status: 1, // Normal
-        timestamp_ms: Date.now(),
-        tenant_id: tenantId
-      }, { transaction });
-
-      // 2. Ensure Conversation exists
+      // 1. 先确保 Conversation 存在（满足“先建会话再建消息”的新逻辑）
       let conversation = await Conversation.findOne({
         where: { conversation_id: conversationId, tenant_id: tenantId },
         transaction
@@ -57,18 +45,36 @@ module.exports = {
       if (!conversation) {
         const minId = Math.min(Number(senderId), Number(receiverId));
         const maxId = Math.max(Number(senderId), Number(receiverId));
-        conversation = await Conversation.create({
-          conversation_id: conversationId,
-          user_a: minId,
-          user_b: maxId,
-          tenant_id: tenantId,
-          unread_a: 0,
-          unread_b: 0,
-          deleted: false
-        }, { transaction });
+        conversation = await Conversation.create(
+          {
+            conversation_id: conversationId,
+            user_a: minId,
+            user_b: maxId,
+            tenant_id: tenantId,
+            unread_a: 0,
+            unread_b: 0,
+            deleted: false
+          },
+          { transaction }
+        );
       }
 
-      // 3. Update Conversation (last_msg, unread count)
+      // 2. 在已存在的 Conversation 下创建消息
+      const msg = await Message.create(
+        {
+          conversation_id: conversationId,
+          sender_id: senderId,
+          receiver_id: receiverId,
+          content: content.trim(),
+          content_type: 'text',
+          status: 1, // Normal
+          timestamp_ms: Date.now(),
+          tenant_id: tenantId
+        },
+        { transaction }
+      );
+
+      // 3. 更新会话的最后一条消息及未读计数
       // Check if sender is user_a or user_b
       const isSenderA = Number(senderId) === Number(conversation.user_a);
       

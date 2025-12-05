@@ -1,0 +1,73 @@
+# 本地文件路径 -> OSS URL 映射表
+# 生成时间: 2025/12/5 13:00:22
+# ==========================================
+
+homeworks\15c3bfcb518ad9a3c8379a6ffdb5c031.txt
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/15c3bfcb518ad9a3c8379a6ffdb5c031.txt
+
+homeworks\257b6416f068a311b672d0397995cd8a.txt
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/257b6416f068a311b672d0397995cd8a.txt
+
+homeworks\43b80945250e246dc74d8e8f2b14bb79.txt
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/43b80945250e246dc74d8e8f2b14bb79.txt
+
+homeworks\59db0ca5118dc571981fa784e64a1ece.txt
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/59db0ca5118dc571981fa784e64a1ece.txt
+
+homeworks\647942628622f712c97313e7f274cb87.txt
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/647942628622f712c97313e7f274cb87.txt
+
+homeworks\eca885878bb594f5c3c30fd527a778be.txt
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/homeworks/eca885878bb594f5c3c30fd527a778be.txt
+
+images\avatars\c31c9ad464974e2f639fea24cbe2fc1e.txt
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/c31c9ad464974e2f639fea24cbe2fc1e.txt
+
+images\avatars\屏幕截图 2025-12-02 190506.png
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190506.png
+
+images\avatars\屏幕截图 2025-12-02 190544.png
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190544.png
+
+images\avatars\屏幕截图 2025-12-02 190602.png
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190602.png
+
+images\avatars\屏幕截图 2025-12-02 190615.png
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190615.png
+
+images\avatars\屏幕截图 2025-12-02 190628.png
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/avatars/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190628.png
+
+images\covers\屏幕截图 2025-12-02 190040.png
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190040.png
+
+images\covers\屏幕截图 2025-12-02 190057.png
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190057.png
+
+images\covers\屏幕截图 2025-12-02 190110.png
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190110.png
+
+images\covers\屏幕截图 2025-12-02 190133.png
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/images/covers/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-12-02%20190133.png
+
+materials\README_测试文件说明.md
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/materials/README_%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E.md
+
+materials\test_material_1.pdf
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_1.pdf
+
+materials\test_material_2.pdf
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_2.pdf
+
+materials\test_material_3.doc
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_3.doc
+
+materials\test_material_4.docx
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/materials/test_material_4.docx
+
+materials\实践报告.docx
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/materials/%E5%AE%9E%E8%B7%B5%E6%8A%A5%E5%91%8A.docx
+
+materials\测试文件生成指南.md
+→ https://icy1883.oss-cn-beijing.aliyuncs.com/materials/%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E6%8C%87%E5%8D%97.md
+
